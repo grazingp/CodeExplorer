@@ -68,6 +68,20 @@ type
   TCodeUsesUnit = class(TCodeElement)
   end;
 
+  { TCodeSpecialize }
+
+  TCodeSpecialize = class(TCodeElement)
+  private
+    FBaseClass: String;
+    FTypeClass: String;
+    function GetName: String;
+    procedure SetName(AValue: String);
+  public
+  	property Name: String read GetName write SetName;
+    property BaseClass: String read FBaseClass write FBaseClass;
+    property TypeClass: String read FTypeClass write FTypeClass;
+  end;
+
   { TCodeClass }
   TCodeClass = class(TCodeElement)
   private
@@ -75,9 +89,10 @@ type
     FComment: String;
     function GetName: String;
     procedure SetBaseClass(AValue: String);
+    procedure SetName(AValue: String);
   public
     function AddScope(AScope: String): TCodeClassScope;
-    property Name: String read GetName;
+    property Name: String read GetName write SetName;
     property BaseClass: String read FBaseClass write SetBaseClass;
     property Comment: String read FComment write FComment;
   end;
@@ -208,6 +223,18 @@ type
 
 
 implementation
+
+{ TCodeSpecialize }
+
+function TCodeSpecialize.GetName: String;
+begin
+  Result := inherited Code;
+end;
+
+procedure TCodeSpecialize.SetName(AValue: String);
+begin
+	inherited Code := AValue;
+end;
 
 { TCodeClassScope }
 
@@ -470,6 +497,11 @@ procedure TCodeClass.SetBaseClass(AValue: String);
 begin
   if FBaseClass = AValue then Exit;
   FBaseClass := AValue;
+end;
+
+procedure TCodeClass.SetName(AValue: String);
+begin
+  inherited Code := AValue;
 end;
 
 function TCodeClass.AddScope(AScope: String): TCodeClassScope;

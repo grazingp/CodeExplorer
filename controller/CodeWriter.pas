@@ -29,6 +29,7 @@ type
     procedure WriteUnit(AUnit: TCodeUnit);
     procedure WriteComment(AComment: TCodeComment);
     procedure WriteUses(AUses: TCodeUses);
+    procedure WriteSpecialize(ASpecialize: TCodeSpecialize);
     procedure WriteClass(AClass: TCodeClass);
     procedure WriteClassScope(const AClassName: String; AClassScape: TCodeClassScope; var ACode: String);
     procedure WriteMember(AMember: TCodeMember; var ACode: String);
@@ -82,6 +83,11 @@ begin
   else if AElement is TCodeUses then
   begin
   	WriteUses(AElement as TCodeUses);
+    exit;
+  end
+  else if AElement is TCodeSpecialize then
+  begin
+    WriteSpecialize(AElement as TCodeSpecialize);
     exit;
   end
   else if AElement is TCodeClass then
@@ -152,6 +158,14 @@ begin
   end;
 
   FUsesCode += code;
+end;
+
+procedure TCodeWriter.WriteSpecialize(ASpecialize: TCodeSpecialize);
+var
+  code: String;
+begin
+  code := '  ' + ASpecialize.Name + ' = specialize ' + ASpecialize.BaseClass + '<' + ASpecialize.TypeClass + '>;' + #10#10;
+  FInterfaceCode += code;
 end;
 
 procedure TCodeWriter.WriteClass(AClass: TCodeClass);

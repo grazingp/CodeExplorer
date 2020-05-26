@@ -23,8 +23,10 @@ type
     FSpaces: TDynStringArray;
 
     procedure ParseElement(AElement: TCodeElement);
+		procedure ParseConst(AConst: TCodeConst);
     procedure ParseUses(ACodeUses: TCodeUses);
     procedure ParseComment(AElement: TCodeComment; AStart, AEnd: String);
+		procedure ParseSpecialize(ASpecialize: TCodeSpecialize);
   	procedure ParseClass(AElement: TCodeClass);
     procedure ParseClassProperty(AProp: TCodeClassProperty);
     procedure ParseFunction(AFunc: TCodeFunction);
@@ -97,6 +99,12 @@ begin
       NextToken(';', 1);
 			continue;
     end
+    else if EggStrEqualSame(c, 'const') then
+    begin
+      Inc(FIndex);
+			ParseConst(AElement.Children.Append(TCodeConst) as TCodeConst);
+			continue;
+    end
     else if EggStrEqualSame(c, 'type') then
     begin
     end
@@ -113,6 +121,11 @@ begin
       FCodeSection := csUses;
       ParseUses(AElement.Children.Append(TCodeUses) as TCodeUses);
 			continue;
+    end
+    else if EggStrEqualSame(c, 'specialize') then
+    begin
+			ParseSpecialize(AElement.Children.Append(TCodeSpecialize) as TCodeSpecialize);
+      continue;
     end
     else if EggStrEqualSame(c, 'class') then
     begin
@@ -151,6 +164,11 @@ begin
     ;
     Inc(FIndex);
   end;
+end;
+
+procedure TCodeParser.ParseConst(AConst: TCodeConst);
+begin
+
 end;
 
 procedure TCodeParser.ParseUses(ACodeUses: TCodeUses);
@@ -200,6 +218,19 @@ begin
     Inc(FIndex);
   end;
   AElement.Code := Trim(code);
+end;
+
+procedure TCodeParser.ParseSpecialize(ASpecialize: TCodeSpecialize);
+var
+  b, t: String;
+begin
+	ASpecialize.Name := GetPriorWord(FIndex - 1);
+  Inc(FIndex);
+  NextWord(b, 1);
+  ASpecialize.BaseClass := b;
+  NextWord(t, 1);
+  ASpecialize.TypeClass := t;
+	NextToken(';', 1);
 end;
 
 procedure TCodeParser.ParseClass(AElement: TCodeClass);
@@ -699,7 +730,7 @@ end;
 constructor TCodeParser.Create;
 begin
   FCodeSection := csUnit;
-  FKeywords := EggArrayOf(' ', #10, #9, ':=', '=', ';', ':', '.', ',', '{', '}', '(', ')', '''');
+  FKeywords := EggArrayOf(' ', #10, #9, ':=', '=', ';', ':', '.', ',', '{', '}', '(', ')', '<', '>', '''');
   FSpaces := EggArrayOf(' ', #10, #9);
 end;
 

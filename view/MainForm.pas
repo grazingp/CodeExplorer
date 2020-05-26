@@ -18,16 +18,22 @@ type
     FPropertyComment_ed: TMemo;
     FFunctionName_ed: TEdit;
     FMemberComment_ed: TMemo;
+    FClassBaseClass_cmb: TComboBox;
+    FSpecializeComment_ed: TMemo;
+    FClassName_ed: TEdit;
+    FSpecializeTypeClass_cmb: TComboBox;
     FPropertyName_ed: TEdit;
     FFunctionResult_cmb: TComboBox;
     FFunctionContent_ed: TSynEdit;
     FMemberName_ed: TEdit;
+    FSpecializeName_ed: TEdit;
     FPropertyType_cmb: TComboBox;
     FFunction_pop: TPopupMenu;
     FEditor_imgs: TImageList;
     FMemberType_cmb: TComboBox;
     FPropertyGetter_cmb: TComboBox;
     FPropertySetter_cmb: TComboBox;
+    FSpecializeBaseClass_cmb: TComboBox;
     FTree_imgs: TImageList;
     FEditor_book: TNotebook;
     FFunction_page: TPage;
@@ -36,6 +42,12 @@ type
     FClassComment_ed: TMemo;
     Label10: TLabel;
     Label11: TLabel;
+    Label12: TLabel;
+    Label13: TLabel;
+    Label14: TLabel;
+    Label15: TLabel;
+    Label16: TLabel;
+    Label17: TLabel;
     Label2: TLabel;
     FFunctionComment_ed: TMemo;
     Label3: TLabel;
@@ -61,9 +73,12 @@ type
     FAddArgvMember: TMenuItem;
     FDeleteMember_mitem: TMenuItem;
     FDeleteProperty_mitem: TMenuItem;
+    FSpecialize_page: TPage;
+    FDeleteSpecialize_mitem: TMenuItem;
     Panel1: TPanel;
     Panel10: TPanel;
     Panel11: TPanel;
+    Panel12: TPanel;
     Panel2: TPanel;
     Panel3: TPanel;
     Panel4: TPanel;
@@ -77,6 +92,7 @@ type
     FArgument_pop: TPopupMenu;
     FMember_pop: TPopupMenu;
     FProperty_pop: TPopupMenu;
+    FSpecialize_pop: TPopupMenu;
     Splitter1: TSplitter;
     FCode_ed: TSynEdit;
     Splitter2: TSplitter;
@@ -112,12 +128,18 @@ type
     procedure FCode_treeSelectionChanged(Sender: TObject);
     procedure FDeleteMember_mitemClick(Sender: TObject);
     procedure FDeleteProperty_mitemClick(Sender: TObject);
+    procedure FDeleteSpecialize_mitemClick(Sender: TObject);
     procedure FFunctionDelete_mitemClick(Sender: TObject);
     procedure FPasteEditor_btnClick(Sender: TObject);
   private
     FFileName: String;
     FCodeTree: TCodeTree;
 
+    procedure DoChangeClassBaseClass(Sender: TObject);
+    procedure DoChangeClassName(Sender: TObject);
+    procedure DoChangeSpecializeBaseClass(Sender: TObject);
+    procedure DoChangeSpecializeName(Sender: TObject);
+    procedure DoChangeSpecializeTypeClass(Sender: TObject);
     procedure RebindElemnt();
     procedure BindElement(AElement: TCodeElement);
     procedure DeleteElement(AElementClass: TClass);
@@ -161,6 +183,7 @@ const
   EDITOR_CLASS_PAGE: Integer = 1;
   EDITOR_CLASS_PROPERTY_PAGE = 2;
   EDITOR_MEMBER_PAGE = 3;
+  EDITOR_SPECIALIZE_PAGE = 4;
 
 { TFMainForm }
 procedure TFMainForm.FPasteEditor_btnClick(Sender: TObject);
@@ -179,6 +202,101 @@ begin
   begin
     element := TCodeElement(node.Data);
     BindElement(element);
+  end;
+end;
+
+procedure TFMainForm.DoChangeSpecializeName(Sender: TObject);
+var
+  node: TTreeNode;
+  element: TCodeElement;
+  sp: TCodeSpecialize;
+begin
+  node := FCode_tree.Selected;
+  if Assigned(node) then
+  begin
+    if not Assigned(node.Data) then exit;
+    element := TCodeElement(node.Data);
+    if element is TCodeSpecialize then
+    begin
+      sp := element as TCodeSpecialize;
+      sp.Name := FSpecializeName_ed.Text;
+    end;
+  end;
+end;
+
+procedure TFMainForm.DoChangeSpecializeTypeClass(Sender: TObject);
+var
+  node: TTreeNode;
+  element: TCodeElement;
+  sp: TCodeSpecialize;
+begin
+  node := FCode_tree.Selected;
+  if Assigned(node) then
+  begin
+    if not Assigned(node.Data) then exit;
+    element := TCodeElement(node.Data);
+    if element is TCodeSpecialize then
+    begin
+      sp := element as TCodeSpecialize;
+      sp.TypeClass := FSpecializeTypeClass_cmb.Text;
+    end;
+  end;
+end;
+
+procedure TFMainForm.DoChangeSpecializeBaseClass(Sender: TObject);
+var
+  node: TTreeNode;
+  element: TCodeElement;
+  sp: TCodeSpecialize;
+begin
+  node := FCode_tree.Selected;
+  if Assigned(node) then
+  begin
+    if not Assigned(node.Data) then exit;
+    element := TCodeElement(node.Data);
+    if element is TCodeSpecialize then
+    begin
+      sp := element as TCodeSpecialize;
+      sp.BaseClass := FSpecializeBaseClass_cmb.Text;
+    end;
+  end;
+end;
+
+procedure TFMainForm.DoChangeClassName(Sender: TObject);
+var
+  node: TTreeNode;
+  element: TCodeElement;
+  cls: TCodeClass;
+begin
+  node := FCode_tree.Selected;
+  if Assigned(node) then
+  begin
+    if not Assigned(node.Data) then exit;
+    element := TCodeElement(node.Data);
+    if element is TCodeClass then
+    begin
+      cls := element as TCodeClass;
+      cls.Name := FClassName_ed.Text;
+    end;
+  end;
+end;
+
+procedure TFMainForm.DoChangeClassBaseClass(Sender: TObject);
+var
+  node: TTreeNode;
+  element: TCodeElement;
+  cls: TCodeClass;
+begin
+  node := FCode_tree.Selected;
+  if Assigned(node) then
+  begin
+    if not Assigned(node.Data) then exit;
+    element := TCodeElement(node.Data);
+    if element is TCodeClass then
+    begin
+      cls := element as TCodeClass;
+      cls.BaseClass := FClassBaseClass_cmb.Text;
+    end;
   end;
 end;
 
@@ -877,6 +995,7 @@ var
   pageIndex: Integer;
   prop: TCodeClassProperty;
   mem: TCodeMember;
+  sp: TCodeSpecialize;
 begin
   pageIndex := -1;
   node := FCode_tree.Selected;
@@ -886,10 +1005,18 @@ begin
     if element is TCodeClass then
     begin
       cls := element as TCodeClass;
-      FCode_tree.PopupMenu := FClass_pop;
+
+      FClassName_ed.OnChange := nil;
+      FClassName_ed.Text := cls.Name;
+      FClassName_ed.OnChange := @DoChangeClassName;
+      FClassBaseClass_cmb.OnChange := nil;
+      FClassBaseClass_cmb.Text := cls.BaseClass;
+      FClassBaseClass_cmb.OnChange := @DoChangeClassBaseClass;
       FClassComment_ed.OnChange := nil;
       FClassComment_ed.Text := cls.Comment;
       FClassComment_ed.OnChange := @DoChangeClassComment;
+
+      FCode_tree.PopupMenu := FClass_pop;
       pageIndex := EDITOR_CLASS_PAGE;
     end
     else if element is TCodeClassScope then
@@ -957,6 +1084,22 @@ begin
       FCode_tree.PopupMenu := FMember_pop;
       pageIndex := EDITOR_MEMBER_PAGE;
     end
+    else if element is TCodeSpecialize then
+    begin
+    	sp := element as TCodeSpecialize;
+      FSpecializeName_ed.OnChange := nil;
+      FSpecializeName_ed.Text := sp.Name;
+      FSpecializeName_ed.OnChange := @DoChangeSpecializeName;
+      FSpecializeBaseClass_cmb.OnChange := nil;
+      FSpecializeBaseClass_cmb.Text := sp.BaseClass;
+      FSpecializeBaseClass_cmb.OnChange := @DoChangeSpecializeBaseClass;
+      FSpecializeTypeClass_cmb.OnChange := nil;
+      FSpecializeTypeClass_cmb.Text := sp.TypeClass;
+      FSpecializeTypeClass_cmb.OnChange := @DoChangeSpecializeTypeClass;
+
+      FCode_tree.PopupMenu := FSpecialize_pop;
+      pageIndex := EDITOR_SPECIALIZE_PAGE
+    end
     ;
   end;
   FEditor_book.PageIndex := pageIndex;
@@ -970,6 +1113,11 @@ end;
 procedure TFMainForm.FDeleteProperty_mitemClick(Sender: TObject);
 begin
   DeleteElement(TCodeClassProperty.ClassType);
+end;
+
+procedure TFMainForm.FDeleteSpecialize_mitemClick(Sender: TObject);
+begin
+  DeleteElement(TCodeSpecialize.ClassType);
 end;
 
 procedure TFMainForm.FFunctionDelete_mitemClick(Sender: TObject);

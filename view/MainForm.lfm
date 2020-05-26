@@ -644,7 +644,7 @@ object FMainForm: TFMainForm
           Height = 300
           Top = 0
           Width = 642
-          PageIndex = 0
+          PageIndex = 1
           Align = alClient
           TabOrder = 0
           object FFunction_page: TPage
@@ -1235,19 +1235,51 @@ object FMainForm: TFMainForm
               TabOrder = 0
               object FClassComment_ed: TMemo
                 Left = 8
-                Height = 90
-                Top = 27
+                Height = 40
+                Top = 89
                 Width = 616
                 Anchors = [akTop, akLeft, akRight]
-                TabOrder = 0
+                Lines.Strings = (                )
+                TabOrder = 2
               end
               object Label1: TLabel
                 Left = 8
                 Height = 16
-                Top = 9
+                Top = 71
                 Width = 84
                 Caption = 'クラスコメント'
                 ParentColor = False
+              end
+              object Label16: TLabel
+                Left = 7
+                Height = 16
+                Top = 6
+                Width = 35
+                Caption = 'Name'
+                ParentColor = False
+              end
+              object FClassName_ed: TEdit
+                Left = 108
+                Height = 22
+                Top = 4
+                Width = 465
+                TabOrder = 0
+              end
+              object Label17: TLabel
+                Left = 7
+                Height = 16
+                Top = 37
+                Width = 66
+                Caption = 'Base Class'
+                ParentColor = False
+              end
+              object FClassBaseClass_cmb: TComboBox
+                Left = 108
+                Height = 20
+                Top = 35
+                Width = 465
+                ItemHeight = 19
+                TabOrder = 1
               end
             end
           end
@@ -1284,6 +1316,7 @@ object FMainForm: TFMainForm
                 Top = 158
                 Width = 627
                 Anchors = [akTop, akLeft, akRight]
+                Lines.Strings = (                )
                 TabOrder = 4
               end
               object FPropertyName_ed: TEdit
@@ -1403,6 +1436,83 @@ object FMainForm: TFMainForm
               end
             end
           end
+          object FSpecialize_page: TPage
+            object Panel12: TPanel
+              Left = 0
+              Height = 300
+              Top = 0
+              Width = 642
+              Align = alClient
+              BevelOuter = bvNone
+              ClientHeight = 300
+              ClientWidth = 642
+              TabOrder = 0
+              object FSpecializeBaseClass_cmb: TComboBox
+                Left = 108
+                Height = 20
+                Top = 35
+                Width = 465
+                ItemHeight = 19
+                TabOrder = 1
+              end
+              object Label12: TLabel
+                Left = 7
+                Height = 16
+                Top = 37
+                Width = 66
+                Caption = 'Base Class'
+                ParentColor = False
+              end
+              object FSpecializeComment_ed: TMemo
+                Left = 5
+                Height = 40
+                Top = 123
+                Width = 627
+                Anchors = [akTop, akLeft, akRight]
+                Lines.Strings = (                )
+                TabOrder = 3
+              end
+              object FSpecializeName_ed: TEdit
+                Left = 108
+                Height = 22
+                Top = 4
+                Width = 465
+                TabOrder = 0
+              end
+              object Label13: TLabel
+                Left = 7
+                Height = 16
+                Top = 6
+                Width = 35
+                Caption = 'Name'
+                ParentColor = False
+              end
+              object Label14: TLabel
+                Left = 7
+                Height = 16
+                Top = 102
+                Width = 144
+                Caption = 'ジェネリック型のコメント'
+                ParentColor = False
+              end
+              object Label15: TLabel
+                Left = 7
+                Height = 16
+                Top = 67
+                Width = 66
+                Caption = 'Type Class'
+                ParentColor = False
+              end
+              object FSpecializeTypeClass_cmb: TComboBox
+                Left = 108
+                Height = 20
+                Top = 65
+                Width = 465
+                ItemHeight = 19
+                TabOrder = 2
+              end
+            end
+          end
         end
       end
       object Splitter2: TSplitter
@@ -1504,7 +1614,7 @@ object FMainForm: TFMainForm
     left = 547
     top = 142
     Bitmap = {
-      4C690B0000001000000010000000000000000000000000000000000000000000
+      4C690C0000001000000010000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
@@ -1856,7 +1966,39 @@ object FMainForm: TFMainForm
       0D03582F080000000000000000004826060E88490D5188490DB588490DEA8849
       0DB388490D4F88490D0908040000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000603309002011
-      0300000000000000000000000000
+      030000000000000000000000000000000000000000000000000045537F0E3D5C
+      8CAC3B5F90DD3D5C8DCE45537F0E000000000000000045537F013E5B8B8E3C5E
+      90D93D5C8CE045537F2600000000000000000000000045537F0E415786D23764
+      9AF72D72ACFF1294DFFD3D5C8DD245537F0E45537F01415785AD37639AF63665
+      9AFC0D9BE9FF3B5F91E345537F260000000045537F0E415786D22D71AFFD267B
+      BFFF316BA5FB2D72ACFF1294DFFD3D5C8DBE415785AD3369A3F4267BBFFF2C71
+      AFFD36669CFF0D9BE9FF3D5C8CE045537F0E415786D22D71AFFD267BBFFF267B
+      BFFF267BBFFF316AA5FA3369A0FE44537FFB3369A3F4267BBFFF267BBFFF267B
+      BFFF2C71AFFD36659AFC3C5E90D83D5C8CAC37649AF7267BBFFF267BBFFF267B
+      BFFF267BBFFF267BBFFF3F5D8FF73F5D8FF6267BBFFF267BBFFF267BBFFF267B
+      BFFF267BBFFF376399F53E5B8B8C3B5F90DD2D72ACFF316BA6FB267BBFFF267B
+      BFFF267BBFFF3C679DFF4988C7F84993D7F6327ABAFF267BBFFF267BBFFF267B
+      BFFF3369A3F4415785AD45537F013D5C8DCE1294DFFD2977B5FF2678BBF8267B
+      BFFF3C679DFF4887C7FD4EB1FFFF4EB1FFFF4889CAFC3C679DFF267BBFFF3369
+      A3F4415785AD45537F010000000045537F0E3D5C8DD21294DFFD2D71ACFD3F5D
+      8FF74988C7F84EB1FFFF4EB1FFFF4EB1FFFF4EB1FFFF4988C7F83F5D8FF64453
+      7FFB3D5C8DBE45537F0E000000000000000045537F0E3D5C8DBE44537FFB3F5D
+      8FF64988C7F84EB1FFFF4EB1FFFF4EB1FFFF4EB1FFFF4988C7F83F5D8FF73369
+      A0FE1294DFFC3D5C8DD245537F0E0000000045537F01415785AD3369A3F4267B
+      BFFF3C679DFF4887C7FC4EB1FFFF4EB1FFFF4887C7FC3C679DFF267BBFFF316B
+      A5FA2D72ACFF1294DFFC3D5C8DCE45537F01415785AD3369A3F4267BBFFF267B
+      BFFF267BBFFF3C679DFF4988C7F84988C7F83C679DFF267BBFFF267BBFFF267B
+      BFFF316BA5FB2D71ACFF3B5F91DC3E5B8B8E37639AF6267BBFFF267BBFFF267B
+      BFFF267BBFFF267BBFFF3F5D8FF63F5D8FF7267BBFFF267BBFFF267BBFFF267B
+      BFFF267BBFFF37639AF73E5B8CAB3C5E90D936659AFC2C71AFFD267BBFFF267B
+      BFFF267BBFFF3369A3F444537FFB33699FFE316BA5FA267BBFFF267BBFFF267B
+      BFFF2D71AFFC415786D145537F0E3D5C8CE00D9BE9FF36669CFF2C71AFFD267B
+      BFFF3369A3F4415785AD3D5C8DBE1293DEFD2D72ACFF316BA6FB267BBFFF2D71
+      AFFC415786D145537F0E0000000045537F263B5F91E30D9BE9FF36659AFC3763
+      99F5415785AD45537F0145537F0E3D5C8DD21294DFFD2D71ACFF37649AF74157
+      86D145537F0E00000000000000000000000045537F263D5C8CE13C5E90D83E5B
+      8B8C45537F01000000000000000045537F0E3D5C8DCE3B5F91DC3E5B8CAB4553
+      7F0E000000000000000000000000
     }
   end
   object FClass_pop: TPopupMenu
@@ -1970,6 +2112,14 @@ object FMainForm: TFMainForm
     object FDeleteProperty_mitem: TMenuItem
       Caption = 'Delete'
       OnClick = FDeleteProperty_mitemClick
+    end
+  end
+  object FSpecialize_pop: TPopupMenu
+    left = 782
+    top = 298
+    object FDeleteSpecialize_mitem: TMenuItem
+      Caption = 'Delete'
+      OnClick = FDeleteSpecialize_mitemClick
     end
   end
 end

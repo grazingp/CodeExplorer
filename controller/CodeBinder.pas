@@ -21,6 +21,8 @@ const
   DefaultFunctionImageIndex = 8;
   DefaultUnitImageIndex = 9;
   DefaultFunctionArgvImageIndex = 10;
+  DefaultSpecializeImageIndex = 11;
+
 type
 
   { TCodeBinder }
@@ -39,6 +41,7 @@ type
     FFunctionImageIndex: Integer;
     FUnitImageIndex: Integer;
 		FFunctionArgvImageIndex: Integer;
+    FSpecializeImageIndex: Integer;
 
     procedure BindUnit(ACodeTree: TCodeTree; AUnitNode: TTreeNode);
     procedure BindUses(ACodeTree: TCodeTree; AUsesNode: TTreeNode);
@@ -47,6 +50,8 @@ type
     procedure BindMember(AMember: TCodeMember; AMemberNode: TTreeNode);
     procedure BindClassProperty(AClassProperty: TCodeClassProperty; APropNode: TTreeNode);
     procedure BindFunction(AFunction: TCodeFunction; AFuncNode: TTreeNode);
+  	procedure BindSpecialize(ASpecialize: TCodeSpecialize; ASpecializeNode: TTreeNode);
+    function GetCaption(AElement: TCodeElement): String;
   public
     constructor Create;
     procedure Bind(ACodeTree: TCodeTree; ATreeView: TTreeView);
@@ -105,7 +110,7 @@ var
   i, j: Integer;
   item: TCodeElement;
   classElement: TCodeClass;
-  classNode, scopeNode, funcNode: TTreeNode;
+  classNode, scopeNode, funcNode, specializeNode: TTreeNode;
   element: TCodeElement;
 begin
 	for i := 0 to Pred(ACodeTree.Root.Children.Count) do
@@ -114,7 +119,7 @@ begin
     if item is TCodeClass then
     begin
       classElement := item as TCodeClass;
-    	classNode := FTreeView.Items.AddChildObject(ATypeNode, classElement.Name + ' : ' + classElement.BaseClass, classElement);
+    	classNode := FTreeView.Items.AddChildObject(ATypeNode, GetCaption(classElement), classElement);
       classNode.StateIndex := FClassImageIndex;
 
       for j := 0 to Pred(classElement.Children.Count) do
@@ -145,6 +150,11 @@ begin
         end;
       end;
       classNode.Expand(False);
+    end
+    else if item is TCodeSpecialize then
+    begin
+      specializeNode := FTreeView.Items.AddChild(ATypeNode, '');
+    	BindSpecialize(item as TCodeSpecialize, specializeNode);
     end
     else if item is TCodeFunction then
     begin
@@ -258,6 +268,25 @@ begin
   end;
 end;
 
+procedure TCodeBinder.BindSpecialize(ASpecialize: TCodeSpecialize; ASpecializeNode: TTreeNode);
+begin
+  ASpecializeNode.Text := ASpecialize.Name + ' : ' + ASpecialize.BaseClass + '<' + ASpecialize.TypeClass + '>';
+  ASpecializeNode.Data := ASpecialize;
+  ASpecializeNode.StateIndex := FSpecializeImageIndex;
+end;
+
+function TCodeBinder.GetCaption(AElement: TCodeElement): String;
+var
+  cls: TCodeClass;
+begin
+  Result := '';
+  if AElement is TCodeClass then
+  begin
+		cls := AElement as TCodeClass;
+    Result := cls.Name + ' : ' + cls.BaseClass
+  end;
+end;
+
 constructor TCodeBinder.Create;
 begin
 	FFolderImageIndex := DefaultFolderImageIndex;
@@ -271,6 +300,7 @@ begin
   FFunctionImageIndex := DefaultFunctionImageIndex;
   FUnitImageIndex := DefaultUnitImageIndex;
   FFunctionArgvImageIndex := DefaultFunctionArgvImageIndex;
+  FSpecializeImageIndex := DefaultSpecializeImageIndex;
 end;
 
 procedure TCodeBinder.Bind(ACodeTree: TCodeTree; ATreeView: TTreeView);
@@ -280,7 +310,7 @@ begin
   FTreeView := ATreeView;
 	ATreeView.Items.Clear;
 
-  unitNode := ATreeView.Items.Add(nil, 'Uses');
+  unitNode := ATreeView.Items.Add(nil, 'Unit');
   unitNode.StateIndex := FUnitImageIndex;
   BindUnit(ACodeTree, unitNode);
 
@@ -309,7 +339,16 @@ begin
   else if AElement is TCodeClassProperty then
   begin
     BindClassProperty(AElement as TCodeClassProperty, ANode);
-  end;
+  end
+  else if AElement is TCodeSpecialize then
+  begin
+  	BindSpecialize(AElement as TCodeSpecialize, ANode);
+  end
+  else if AElement is TCodeClass then
+  begin
+    ANode.Text := GetCaption(AElement);
+  end
+  ;
 end;
 
 end.
