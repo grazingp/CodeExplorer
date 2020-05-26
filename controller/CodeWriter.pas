@@ -17,14 +17,16 @@ type
   TCodeWriter = class(TObject)
   private
     FCodeTree: TCodeTree;
+    FUnitCode: String;
     FUsesCode: String;
     FInterfaceCode: String;
     FImplementationCode: String;
     FTypeCode: String;
     FSection: TCodeWriterSection;
 
-    function IndentComment(AComment: String; AIndent: Integer): String;
+    function IndentCode(AComment: String; AIndent: Integer): String;
     procedure WriteElement(AElement: TCodeElement);
+    procedure WriteUnit(AUnit: TCodeUnit);
     procedure WriteComment(AComment: TCodeComment);
     procedure WriteUses(AUses: TCodeUses);
     procedure WriteClass(AClass: TCodeClass);
@@ -42,7 +44,7 @@ implementation
 
 { TCodeWriter }
 
-function TCodeWriter.IndentComment(AComment: String; AIndent: Integer): String;
+function TCodeWriter.IndentCode(AComment: String; AIndent: Integer): String;
 var
   lines: TDynStringArray;
   i: Integer;
@@ -67,7 +69,12 @@ var
   i: Integer;
   func, content: String;
 begin
-  if AElement is TCodeComment then
+  if AElement is TCodeUnit then
+  begin
+  	WriteUnit(AElement as TCodeUnit);
+    exit;
+  end
+  else if AElement is TCodeComment then
   begin
   	WriteComment(AElement as TCodeComment);
     exit;
@@ -94,6 +101,11 @@ begin
   begin
 		WriteElement(AElement.Children[i]);
   end;
+end;
+
+procedure TCodeWriter.WriteUnit(AUnit: TCodeUnit);
+begin
+	FUnitCode := 'unit ' + AUnit.Name + ';' + #10;
 end;
 
 procedure TCodeWriter.WriteComment(AComment: TCodeComment);
@@ -162,7 +174,7 @@ begin
   end
   else
   begin
-    comment := IndentComment(AClass.Comment, 4);
+    comment := IndentCode(AClass.Comment, 4);
     code += '  { ' + comment;
     if (Pos(#10, comment) > 0) then
     begin
@@ -217,7 +229,7 @@ begin
     else if item is TCodeFunction then
     begin
       WriteFunction(AClassName, item as TCodeFunction, func, content);
-      ACode += indent + func + #10;
+      ACode += indent + IndentCode(func, 2) + #10;
       FImplementationCode += content + #10 + #10;
     end;
   end;
@@ -233,18 +245,32 @@ procedure TCodeWriter.WriteFunction(
   var AFuncName, AContent: String);
 var
   arg: TCodeFunctionArgv;
-  args: String;
+  args, comm: String;
 begin
 	arg := AFunc.Argument;
   args := '';
+  AFuncName := '';
+  AContent := '';
   if Assigned(arg) then
   begin
 		WriteFunctionArgument(arg, args);
   end;
+  if not EggStrEmpty(AFunc.Comment) then
+  begin
+		if Pos(#10, AFunc.Comment) > 0 then
+    begin
+      comm := '{ ' + IndentCode(AFunc.Comment, 2) + #10 + '}' + #10;
+    end
+    else
+    begin
+    	comm := '// ' + AFunc.Comment + #10;
+    end;
+    AFuncName += IndentCode(comm, 2);
+  end;
   if EggStrEmpty(AFunc.ResultType) then
   begin
-  	AFuncName := 'procedure ' + AFunc.Name + args + ';';
-  	AContent := 'procedure ';
+  	AFuncName += 'procedure ' + AFunc.Name + args + ';';
+  	AContent += 'procedure ';
     if not EggStrEmpty(AClassName) then
     begin
 	    AContent += AClassName + '.';
@@ -254,8 +280,8 @@ begin
   end
   else
   begin
-  	AFuncName := 'function ' + AFunc.Name + args + ': ' + AFunc.ResultType + ';';
-  	AContent := 'function ';
+  	AFuncName += 'function ' + AFunc.Name + args + ': ' + AFunc.ResultType + ';';
+  	AContent += 'function ';
     if not EggStrEmpty(AClassName) then
     begin
       AContent += AClassName + '.';
@@ -314,6 +340,7 @@ var
   i: Integer;
 begin
 	FCodeTree := ACodeTree;
+  FUnitCode := '';
   FInterfaceCode := '';
   FImplementationCode := '';
   FTypeCode := '';
@@ -324,7 +351,8 @@ begin
   	WriteElement(FCodeTree.Root.Children[i]);
   end;
 
-  ACode := FUsesCode + #10
+  ACode := FUnitCode + #10
+  			+ FUsesCode + #10
   			+ FTypeCode + #10
   			+ FInterfaceCode
         + 'implementation' + #10#10

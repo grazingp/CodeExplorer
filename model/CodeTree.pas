@@ -10,6 +10,13 @@ uses
 
 type
   TCodeElementList = class;
+  TCodeClassScope = class;
+  TCodeClassFunction = class;
+  TCodeClassMember = class;
+  TCodeClassProperty = class;
+  TCodeFunction = class;
+
+  TCodeElementMove = (emInsert);
 
   { TCodeElement }
   TCodeElement = class(TPersistent)
@@ -17,6 +24,7 @@ type
     FParentList: TCodeElementList;
     FCode: String;
     FChildren: TCodeElementList;
+  	function TrimValue(const AValue: String): String;
   protected
     function GetCode: String; virtual;
   public
@@ -24,6 +32,7 @@ type
     destructor Destroy; override;
     procedure Assign(ASource: TPersistent); override;
     procedure Clear();
+    procedure MoveTo(ADest: TCodeElement; AMove: TCodeElementMove);
     property Code: String read GetCode write FCode;
     property Children: TCodeElementList read FChildren;
   end;
@@ -36,8 +45,11 @@ type
   private
     function GetName: String;
     procedure SetName(AValue: String);
- public
+  public
   	property Name: String read GetName write SetName;
+  end;
+
+  TCodeConst = class(TCodeElement)
   end;
 
   { TCodeComment }
@@ -64,12 +76,19 @@ type
     function GetName: String;
     procedure SetBaseClass(AValue: String);
   public
+    function AddScope(AScope: String): TCodeClassScope;
     property Name: String read GetName;
     property BaseClass: String read FBaseClass write SetBaseClass;
     property Comment: String read FComment write FComment;
   end;
 
+  { TCodeClassScope }
+
   TCodeClassScope = class(TCodeElement)
+  public
+  	function AddFunction(): TCodeClassFunction;
+    function AddClassMember(): TCodeClassMember;
+    function AddClassProperty(): TCodeClassProperty;
   end;
 
   TCodeClassPrivate = class(TCodeClassScope)
@@ -87,8 +106,10 @@ type
   { TCodeMember }
   TCodeMember = class(TCodeElement)
   private
+    FComment: String;
     FMemberType: String;
     function GetName: String;
+    procedure SetComment(AValue: String);
     procedure SetMemberType(AValue: String);
     procedure SetName(AValue: String);
   public
@@ -96,15 +117,21 @@ type
     procedure Assign(ASource: TPersistent); override;
   	property Name: String read GetName write SetName;
     property MemberType: String read FMemberType write SetMemberType;
+    property Comment: String read FComment write SetComment;
+  end;
+
+  TCodeClassMember = class(TCodeMember)
   end;
 
   { TCodeClassProperty }
   TCodeClassProperty = class(TCodeElement)
   private
+    FComment: String;
     FGetter: String;
     FPropertyType: String;
     FSetter: String;
     function GetName: String;
+    procedure SetComment(AValue: String);
     procedure SetPropertyType(AValue: String);
     procedure SetName(AValue: String);
   public
@@ -113,30 +140,42 @@ type
     property PropertyType: String read FPropertyType write SetPropertyType;
     property Getter: String read FGetter write FGetter;
     property Setter: String read FSetter write FSetter;
+    property Comment: String read FComment write SetComment;
   end;
 
   { TCodeFunctionArgv }
   TCodeFunctionArgv = class(TCodeElement)
+  private
+    function GetFunctionElement: TCodeFunction;
   public
     function Equals(ASource: TObject): boolean; override;
+    function AppendMember(): TCodeMember;
+    property FunctionElement: TCodeFunction read GetFunctionElement;
   end;
 
   { TCodeFunction }
   TCodeFunction = class(TCodeElement)
   private
+    FComment: String;
     FContent: String;
     FResultType: String;
     function GetFunctionArgv: TCodeFunctionArgv;
     function GetName: String;
     procedure SetArgument(AValue: TCodeFunctionArgv);
+    procedure SetComment(AValue: String);
     procedure SetContent(AValue: String);
     procedure SetName(AValue: String);
     procedure SetResultType(AValue: String);
   public
-  	property Name: String read GetName write SetName;
+    function AppendArgument(): TCodeFunctionArgv;
+    property Name: String read GetName write SetName;
     property ResultType: String read FResultType write SetResultType;
     property Argument: TCodeFunctionArgv read GetFunctionArgv write SetArgument;
+    property Comment: String read FComment write SetComment;
     property Content: String read FContent write SetContent;
+  end;
+
+  TCodeClassFunction = class(TCodeFunction)
   end;
 
   TCodeElements = specialize TFPGObjectList<TCodeElement>;
@@ -144,11 +183,15 @@ type
   { TCodeElementList }
 
   TCodeElementList = class(TCodeElements)
+  private
+    FOwner: TCodeElement;
+    procedure SetOwner(AValue: TCodeElement);
   public
 		function AppendComment(): TCodeComment;
 		function AppendClass(): TCodeClass;
 		function AppendMember(): TCodeMember;
     function Append(AClass: TCodeElementClass): TCodeElement;
+    property Owner: TCodeElement read FOwner write SetOwner;
   end;
 
   { TCodeTree }
@@ -159,11 +202,29 @@ type
     constructor Create;
     destructor Destroy; override;
     procedure Clear();
+    procedure RemoveElement(AElement: TCodeElement);
     property Root: TCodeElement read FRoot;
   end;
 
 
 implementation
+
+{ TCodeClassScope }
+
+function TCodeClassScope.AddFunction(): TCodeClassFunction;
+begin
+  Result := Children.Append(TCodeClassFunction) as TCodeClassFunction;
+end;
+
+function TCodeClassScope.AddClassMember(): TCodeClassMember;
+begin
+  Result := Children.Append(TCodeClassMember) as TCodeClassMember;
+end;
+
+function TCodeClassScope.AddClassProperty(): TCodeClassProperty;
+begin
+  Result := Children.Append(TCodeClassProperty) as TCodeClassProperty;
+end;
 
 { TCodeUnit }
 
@@ -175,6 +236,11 @@ end;
 procedure TCodeUnit.SetName(AValue: String);
 begin
 	inherited Code := AValue;
+end;
+
+function TCodeFunctionArgv.GetFunctionElement: TCodeFunction;
+begin
+  Result := FParentList.Owner as TCodeFunction;
 end;
 
 { TCodeFunctionArgv }
@@ -223,12 +289,26 @@ begin
   Result := inherited Equals(ASource);
 end;
 
+function TCodeFunctionArgv.AppendMember(): TCodeMember;
+begin
+  Result := Children.Append(TCodeMember) as TCodeMember;
+end;
+
 { TCodeFunction }
 
 procedure TCodeFunction.SetResultType(AValue: String);
 begin
+  AValue := TrimValue(AValue);
   if FResultType = AValue then Exit;
   FResultType := AValue;
+end;
+
+function TCodeFunction.AppendArgument(): TCodeFunctionArgv;
+begin
+  Result := GetFunctionArgv();
+  if Assigned(Result) then exit;
+
+  Result := Children.Append(TCodeFunctionArgv) as TCodeFunctionArgv;
 end;
 
 function TCodeFunction.GetName: String;
@@ -257,8 +337,16 @@ begin
   arg.Assign(AValue);
 end;
 
+procedure TCodeFunction.SetComment(AValue: String);
+begin
+  AValue := TrimValue(AValue);
+  if FComment = AValue then Exit;
+  FComment := AValue;
+end;
+
 procedure TCodeFunction.SetContent(AValue: String);
 begin
+  AValue := TrimValue(AValue);
   if FContent = AValue then Exit;
   FContent := AValue;
 end;
@@ -290,6 +378,12 @@ begin
   Result := Code;
 end;
 
+procedure TCodeClassProperty.SetComment(AValue: String);
+begin
+  if FComment = AValue then Exit;
+  FComment := AValue;
+end;
+
 procedure TCodeClassProperty.SetPropertyType(AValue: String);
 begin
   if FPropertyType = AValue then Exit;
@@ -308,6 +402,7 @@ begin
   FGetter := '';
   FPropertyType := '';
   FSetter := '';
+  FComment := '';
 end;
 
 { TCodeMember }
@@ -315,6 +410,12 @@ end;
 function TCodeMember.GetName: String;
 begin
   Result := Code;
+end;
+
+procedure TCodeMember.SetComment(AValue: String);
+begin
+  if FComment = AValue then Exit;
+  FComment := AValue;
 end;
 
 procedure TCodeMember.SetMemberType(AValue: String);
@@ -371,7 +472,43 @@ begin
   FBaseClass := AValue;
 end;
 
+function TCodeClass.AddScope(AScope: String): TCodeClassScope;
+var
+  scope: TCodeElement;
+begin
+  Result := nil;
+  scope := nil;
+  if EggStrEqualSame(AScope, 'private') then
+  begin
+    scope := Children.Append(TCodeClassPrivate);
+  end
+  else if EggStrEqualSame(AScope, 'protected') then
+  begin
+    scope := Children.Append(TCodeClassProtected);
+  end
+  else if EggStrEqualSame(AScope, 'public') then
+  begin
+    scope := Children.Append(TCodeClassPublic);
+  end
+  else if EggStrEqualSame(AScope, 'published') then
+  begin
+    scope := Children.Append(TCodeClassPublished);
+  end
+  ;
+  if Assigned(scope) then
+  begin
+    scope.Code := AScope;
+    Result := scope as TCodeClassScope;
+  end;
+end;
+
 { TCodeElementList }
+
+procedure TCodeElementList.SetOwner(AValue: TCodeElement);
+begin
+  if FOwner = AValue then Exit;
+  FOwner := AValue;
+end;
 
 function TCodeElementList.AppendComment(): TCodeComment;
 begin
@@ -399,6 +536,12 @@ end;
 
 { TCodeElement }
 
+function TCodeElement.TrimValue(const AValue: String): String;
+begin
+  Result := EggReplaceLine(AValue);
+  Result := Trim(Result);
+end;
+
 function TCodeElement.GetCode: String;
 begin
 	Result := FCode;
@@ -408,6 +551,7 @@ constructor TCodeElement.Create(AParentList: TCodeElementList);
 begin
   FParentList := AParentList;
   FChildren := TCodeElementList.Create(True);
+  FChildren.Owner := Self;
 end;
 
 destructor TCodeElement.Destroy;
@@ -445,6 +589,23 @@ begin
   FChildren.Clear();
 end;
 
+procedure TCodeElement.MoveTo(ADest: TCodeElement; AMove: TCodeElementMove);
+var
+  bk: Boolean;
+  idx: Integer;
+begin
+	if AMove = emInsert then
+  begin
+    bk := FParentList.FreeObjects;
+    FParentList.FreeObjects := False;
+		FParentList.Remove(Self);
+    FParentList.FreeObjects := bk;
+    FParentList := ADest.FParentList;
+    idx := FParentList.IndexOf(ADest);
+    FParentList.Insert(idx, Self);
+  end;
+end;
+
 { TCodeTree }
 
 constructor TCodeTree.Create;
@@ -463,6 +624,14 @@ end;
 procedure TCodeTree.Clear();
 begin
 	FRoot.Clear();
+end;
+
+procedure TCodeTree.RemoveElement(AElement: TCodeElement);
+var
+  list: TCodeElementList;
+begin
+	list := AElement.FParentList;
+  list.Remove(AElement);
 end;
 
 end.

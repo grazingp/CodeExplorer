@@ -9,6 +9,18 @@ uses
   EggStrUtils,
   CodeTree;
 
+const
+	DefaultFolderImageIndex = 0;
+  DefaultClassImageIndex = 1;
+  DefaultClassPrivateImageIndex = 2;
+  DefaultClassProtectedImageIndex = 3;
+  DefaultClassPublicImageIndex = 4;
+  DefaultClassPublishedImageIndex = 5;
+  DefaultMemberImageIndex = 6;
+  DefaultClassPropertyImageIndex = 7;
+  DefaultFunctionImageIndex = 8;
+  DefaultUnitImageIndex = 9;
+  DefaultFunctionArgvImageIndex = 10;
 type
 
   { TCodeBinder }
@@ -22,22 +34,29 @@ type
     FClassProtectedImageIndex: Integer;
     FClassPublicImageIndex: Integer;
     FClassPublishedImageIndex: Integer;
-    FClassMemberImageIndex: Integer;
+    FMemberImageIndex: Integer;
     FClassPropertyImageIndex: Integer;
-    FClassMethodImageIndex: Integer;
+    FFunctionImageIndex: Integer;
     FUnitImageIndex: Integer;
+		FFunctionArgvImageIndex: Integer;
 
     procedure BindUnit(ACodeTree: TCodeTree; AUnitNode: TTreeNode);
     procedure BindUses(ACodeTree: TCodeTree; AUsesNode: TTreeNode);
     procedure BindType(ACodeTree: TCodeTree; ATypeNode: TTreeNode);
     procedure BindClassScope(AClassScope: TCodeClassScope; AScopeNode: TTreeNode);
-    procedure BindClassMember(AMember: TCodeMember; AScopeNode: TTreeNode);
-    procedure BindClassProperty(AClassProperty: TCodeClassProperty; AScopeNode: TTreeNode);
-    procedure BindFunction(AFunction: TCodeFunction; AScopeNode: TTreeNode);
+    procedure BindMember(AMember: TCodeMember; AMemberNode: TTreeNode);
+    procedure BindClassProperty(AClassProperty: TCodeClassProperty; APropNode: TTreeNode);
+    procedure BindFunction(AFunction: TCodeFunction; AFuncNode: TTreeNode);
   public
     constructor Create;
     procedure Bind(ACodeTree: TCodeTree; ATreeView: TTreeView);
+    procedure BindElement(ATreeView: TTreeView; ANode: TTreeNode; AElement: TCodeElement);
+
     property ClassPropertyImageIndex: Integer read FClassPropertyImageIndex write FClassPropertyImageIndex;
+    property ClassPrivateImageIndex: Integer read FClassPrivateImageIndex write FClassPrivateImageIndex;
+    property ClassProtectedImageIndex: Integer read FClassProtectedImageIndex write FClassProtectedImageIndex;
+    property ClassPublicImageIndex: Integer read FClassPublicImageIndex write FClassPublicImageIndex;
+    property ClassPublishedImageIndex: Integer read FClassPublishedImageIndex write FClassPublishedImageIndex;
   end;
 
 implementation
@@ -86,7 +105,7 @@ var
   i, j: Integer;
   item: TCodeElement;
   classElement: TCodeClass;
-  classNode, scopeNode: TTreeNode;
+  classNode, scopeNode, funcNode: TTreeNode;
   element: TCodeElement;
 begin
 	for i := 0 to Pred(ACodeTree.Root.Children.Count) do
@@ -122,12 +141,15 @@ begin
           end
           ;
           BindClassScope(element as TCodeClassScope, scopeNode);
+          scopeNode.Expand(False);
         end;
       end;
+      classNode.Expand(False);
     end
     else if item is TCodeFunction then
     begin
-    	BindFunction(item as TCodeFunction, ATypeNode);
+      funcNode := FTreeView.Items.AddChild(ATypeNode, '');
+    	BindFunction(item as TCodeFunction, funcNode);
     end;
   end;
 end;
@@ -136,51 +158,56 @@ procedure TCodeBinder.BindClassScope(AClassScope: TCodeClassScope; AScopeNode: T
 var
   i: Integer;
   element: TCodeElement;
+  funcNode, propNode, memNode: TTreeNode;
 begin
 	for i := 0 to Pred(AClassScope.Children.Count) do
   begin
 		element := AClassScope.Children[i];
     if element is TCodeMember then
     begin
-    	BindClassMember(element as TCodeMember, AScopeNode);
+    	memNode := FTreeView.Items.AddChild(AScopeNode, '');
+    	BindMember(element as TCodeMember, memNode);
     end
     else if element is TCodeClassProperty then
     begin
-    	BindClassProperty(element as TCodeClassProperty, AScopeNode);
+    	propNode := FTreeView.Items.AddChild(AScopeNode, '');
+    	BindClassProperty(element as TCodeClassProperty, propNode);
     end
     else if element is TCodeFunction then
     begin
-    	BindFunction(element as TCodeFunction, AScopeNode);
+      funcNode := FTreeView.Items.AddChild(AScopeNode, '');
+    	BindFunction(element as TCodeFunction, funcNode);
     end
     ;
   end;
 end;
 
-procedure TCodeBinder.BindClassMember(AMember: TCodeMember; AScopeNode: TTreeNode);
-var
-  node: TTreeNode;
+procedure TCodeBinder.BindMember(AMember: TCodeMember; AMemberNode: TTreeNode);
 begin
-	node := FTreeView.Items.AddChildObject(AScopeNode, AMember.Name + ' : ' + AMember.MemberType, AMember);
-  node.StateIndex := FClassMemberImageIndex;
+	AMemberNode.Text := AMember.Name + ' : ' + AMember.MemberType;
+  AMemberNode.Data := AMember;
+  AMemberNode.StateIndex := FMemberImageIndex;
 end;
 
-procedure TCodeBinder.BindClassProperty(AClassProperty: TCodeClassProperty; AScopeNode: TTreeNode);
-var
-  node: TTreeNode;
+procedure TCodeBinder.BindClassProperty(AClassProperty: TCodeClassProperty; APropNode: TTreeNode);
 begin
-	node := FTreeView.Items.AddChildObject(AScopeNode, AClassProperty.Name + ' : ' + AClassProperty.PropertyType, AClassProperty);
-  node.StateIndex := FClassPropertyImageIndex;
+  APropNode.Text := AClassProperty.Name + ' : ' + AClassProperty.PropertyType;
+  APropNode.Data := AClassProperty;
+  APropNode.StateIndex := FClassPropertyImageIndex;
 end;
 
-procedure TCodeBinder.BindFunction(AFunction: TCodeFunction; AScopeNode: TTreeNode);
+procedure TCodeBinder.BindFunction(AFunction: TCodeFunction; AFuncNode: TTreeNode);
 var
   i, j: Integer;
   element: TCodeElement;
   arg: TCodeFunctionArgv;
   mem: TCodeMember;
   nm, args: String;
-  node: TTreeNode;
+  argvNode, memNode: TTreeNode;
+  oldExpanded: Boolean;
 begin
+  oldExpanded := AFuncNode.Expanded;
+  AFuncNode.DeleteChildren();
   nm := AFunction.Name;
 
   for i := 0 to Pred(AFunction.Children.Count) do
@@ -188,6 +215,9 @@ begin
 		element := AFunction.Children[i];
     if element is TCodeFunctionArgv then
     begin
+      argvNode := FTreeView.Items.AddChildObject(AFuncNode, 'Argument', element);
+      argvNode.StateIndex := FFunctionArgvImageIndex;
+
       arg := element as TCodeFunctionArgv;
       args := '';
       for j := 0 to Pred(arg.Children.Count) do
@@ -203,6 +233,9 @@ begin
         mem := arg.Children[j] as TCodeMember;
         args += mem.Name + ' : ' + mem.MemberType;
 
+      	memNode := FTreeView.Items.AddChild(argvNode, '');
+        BindMember(mem, memNode);
+
         if j = Pred(arg.Children.Count) then
         begin
         	args += ')';
@@ -216,22 +249,28 @@ begin
   	nm += ' : ' + AFunction.ResultType;
   end;
 
-  node := FTreeView.Items.AddChildObject(AScopeNode, nm, AFunction);
-  node.StateIndex := FClassMethodImageIndex;
+  AFuncNode.Text := nm;
+  AFuncNode.StateIndex := FFunctionImageIndex;
+  AFuncNode.Data := AFunction;
+  if oldExpanded then
+  begin
+  	AFuncNode.Expand(True);
+  end;
 end;
 
 constructor TCodeBinder.Create;
 begin
-	FFolderImageIndex := 0;
-  FClassImageIndex := 1;
-  FClassPrivateImageIndex := 2;
-  FClassProtectedImageIndex := 3;
-  FClassPublicImageIndex := 4;
-  FClassPublishedImageIndex := 5;
-  FClassMemberImageIndex := 6;
-  FClassPropertyImageIndex := 7;
-  FClassMethodImageIndex := 8;
-  FUnitImageIndex := 9;
+	FFolderImageIndex := DefaultFolderImageIndex;
+  FClassImageIndex := DefaultClassImageIndex;
+  FClassPrivateImageIndex := DefaultClassPrivateImageIndex;
+  FClassProtectedImageIndex := DefaultClassProtectedImageIndex;
+  FClassPublicImageIndex := DefaultClassPublicImageIndex;
+  FClassPublishedImageIndex := DefaultClassPublishedImageIndex;
+  FMemberImageIndex := DefaultMemberImageIndex;
+  FClassPropertyImageIndex := DefaultClassPropertyImageIndex;
+  FFunctionImageIndex := DefaultFunctionImageIndex;
+  FUnitImageIndex := DefaultUnitImageIndex;
+  FFunctionArgvImageIndex := DefaultFunctionArgvImageIndex;
 end;
 
 procedure TCodeBinder.Bind(ACodeTree: TCodeTree; ATreeView: TTreeView);
@@ -253,7 +292,24 @@ begin
   typeNode.StateIndex := FFolderImageIndex;
 
   BindType(ACodeTree, typeNode);
-  typeNode.Expand(True);
+  typeNode.Expand(False);
+end;
+
+procedure TCodeBinder.BindElement(ATreeView: TTreeView; ANode: TTreeNode; AElement: TCodeElement);
+begin
+  FTreeView := ATreeView;
+  if AElement is TCodeFunction then
+  begin
+  	BindFunction(AElement as TCodeFunction, ANode);
+  end
+  else if AElement is TCodeMember then
+  begin
+    BindMember(AElement as TCodeMember, ANode);
+  end
+  else if AElement is TCodeClassProperty then
+  begin
+    BindClassProperty(AElement as TCodeClassProperty, ANode);
+  end;
 end;
 
 end.

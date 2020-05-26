@@ -593,14 +593,20 @@ object FMainForm: TFMainForm
       TabOrder = 0
       object FCode_tree: TTreeView
         Left = 0
-        Height = 518
+        Height = 396
         Top = 26
         Width = 642
         Align = alClient
+        DragMode = dmAutomatic
         ReadOnly = True
         StateImages = FTree_imgs
         TabOrder = 0
+        OnChanging = FCode_treeChanging
+        OnDragDrop = FCode_treeDragDrop
+        OnDragOver = FCode_treeDragOver
+        OnEnter = FCode_treeEnter
         OnKeyUp = FCode_treeKeyUp
+        OnMouseEnter = FCode_treeMouseEnter
         OnSelectionChanged = FCode_treeSelectionChanged
         Options = [tvoAutoItemHeight, tvoHideSelection, tvoKeepCollapsedNodes, tvoReadOnly, tvoShowButtons, tvoShowLines, tvoShowRoot, tvoToolTips, tvoThemedDraw]
       end
@@ -625,17 +631,17 @@ object FMainForm: TFMainForm
       end
       object Panel5: TPanel
         Left = 0
-        Height = 178
-        Top = 549
+        Height = 300
+        Top = 427
         Width = 642
         Align = alBottom
         BevelOuter = bvNone
-        ClientHeight = 178
+        ClientHeight = 300
         ClientWidth = 642
         TabOrder = 2
         object FEditor_book: TNotebook
           Left = 0
-          Height = 178
+          Height = 300
           Top = 0
           Width = 642
           PageIndex = 0
@@ -644,36 +650,78 @@ object FMainForm: TFMainForm
           object FFunction_page: TPage
             object Panel7: TPanel
               Left = 0
-              Height = 178
+              Height = 300
               Top = 0
               Width = 642
               Align = alClient
               BevelOuter = bvNone
-              ClientHeight = 178
+              ClientHeight = 300
               ClientWidth = 642
               TabOrder = 0
               object Panel8: TPanel
                 Left = 0
-                Height = 32
+                Height = 112
                 Top = 0
                 Width = 642
                 Align = alTop
                 BevelOuter = bvNone
+                ClientHeight = 112
+                ClientWidth = 642
                 TabOrder = 0
+                object FFunctionResult_cmb: TComboBox
+                  Left = 87
+                  Height = 20
+                  Top = 35
+                  Width = 321
+                  ItemHeight = 19
+                  TabOrder = 1
+                end
+                object Label2: TLabel
+                  Left = 7
+                  Height = 16
+                  Top = 37
+                  Width = 71
+                  Caption = 'Result Type'
+                  ParentColor = False
+                end
+                object FFunctionComment_ed: TMemo
+                  Left = 5
+                  Height = 40
+                  Top = 63
+                  Width = 627
+                  Anchors = [akTop, akLeft, akRight]
+                  Lines.Strings = (                  )
+                  TabOrder = 2
+                end
+                object FFunctionName_ed: TEdit
+                  Left = 87
+                  Height = 22
+                  Top = 4
+                  Width = 505
+                  TabOrder = 0
+                end
+                object Label3: TLabel
+                  Left = 7
+                  Height = 16
+                  Top = 6
+                  Width = 35
+                  Caption = 'Name'
+                  ParentColor = False
+                end
               end
               object Panel9: TPanel
                 Left = 0
-                Height = 146
-                Top = 32
+                Height = 188
+                Top = 112
                 Width = 642
                 Align = alClient
                 BevelOuter = bvNone
-                ClientHeight = 146
+                ClientHeight = 188
                 ClientWidth = 642
                 TabOrder = 1
-                inline FContent_ed: TSynEdit
+                inline FFunctionContent_ed: TSynEdit
                   Left = 0
-                  Height = 146
+                  Height = 188
                   Top = 0
                   Width = 642
                   Align = alClient
@@ -1177,12 +1225,12 @@ object FMainForm: TFMainForm
           object FClass_page: TPage
             object Panel6: TPanel
               Left = 0
-              Height = 178
+              Height = 300
               Top = 0
               Width = 642
               Align = alClient
               BevelOuter = bvNone
-              ClientHeight = 178
+              ClientHeight = 300
               ClientWidth = 642
               TabOrder = 0
               object FClassComment_ed: TMemo
@@ -1203,13 +1251,165 @@ object FMainForm: TFMainForm
               end
             end
           end
+          object FClassProperty_page: TPage
+            object Panel10: TPanel
+              Left = 0
+              Height = 300
+              Top = 0
+              Width = 642
+              Align = alClient
+              BevelOuter = bvNone
+              ClientHeight = 300
+              ClientWidth = 642
+              TabOrder = 0
+              object FPropertyType_cmb: TComboBox
+                Left = 108
+                Height = 20
+                Top = 35
+                Width = 296
+                ItemHeight = 19
+                TabOrder = 1
+              end
+              object Label4: TLabel
+                Left = 7
+                Height = 16
+                Top = 37
+                Width = 86
+                Caption = 'Property Type'
+                ParentColor = False
+              end
+              object FPropertyComment_ed: TMemo
+                Left = 5
+                Height = 40
+                Top = 158
+                Width = 627
+                Anchors = [akTop, akLeft, akRight]
+                TabOrder = 4
+              end
+              object FPropertyName_ed: TEdit
+                Left = 108
+                Height = 22
+                Top = 4
+                Width = 465
+                TabOrder = 0
+              end
+              object Label5: TLabel
+                Left = 7
+                Height = 16
+                Top = 6
+                Width = 35
+                Caption = 'Name'
+                ParentColor = False
+              end
+              object Label6: TLabel
+                Left = 7
+                Height = 16
+                Top = 137
+                Width = 108
+                Caption = 'プロパティコメント'
+                ParentColor = False
+              end
+              object Label10: TLabel
+                Left = 7
+                Height = 16
+                Top = 67
+                Width = 38
+                Caption = 'Getter'
+                ParentColor = False
+              end
+              object FPropertyGetter_cmb: TComboBox
+                Left = 108
+                Height = 20
+                Top = 65
+                Width = 465
+                ItemHeight = 19
+                TabOrder = 2
+              end
+              object Label11: TLabel
+                Left = 7
+                Height = 16
+                Top = 99
+                Width = 37
+                Caption = 'Setter'
+                ParentColor = False
+              end
+              object FPropertySetter_cmb: TComboBox
+                Left = 108
+                Height = 20
+                Top = 97
+                Width = 465
+                ItemHeight = 19
+                TabOrder = 3
+              end
+            end
+          end
+          object FMember_page: TPage
+            object Panel11: TPanel
+              Left = 0
+              Height = 300
+              Top = 0
+              Width = 642
+              Align = alClient
+              BevelOuter = bvNone
+              ClientHeight = 300
+              ClientWidth = 642
+              TabOrder = 0
+              object FMemberType_cmb: TComboBox
+                Left = 108
+                Height = 20
+                Top = 35
+                Width = 296
+                ItemHeight = 19
+                TabOrder = 1
+              end
+              object Label7: TLabel
+                Left = 7
+                Height = 16
+                Top = 37
+                Width = 83
+                Caption = 'Member Type'
+                ParentColor = False
+              end
+              object FMemberComment_ed: TMemo
+                Left = 5
+                Height = 40
+                Top = 93
+                Width = 627
+                Anchors = [akTop, akLeft, akRight]
+                TabOrder = 2
+              end
+              object FMemberName_ed: TEdit
+                Left = 108
+                Height = 22
+                Top = 4
+                Width = 465
+                TabOrder = 0
+              end
+              object Label8: TLabel
+                Left = 7
+                Height = 16
+                Top = 6
+                Width = 35
+                Caption = 'Name'
+                ParentColor = False
+              end
+              object Label9: TLabel
+                Left = 7
+                Height = 16
+                Top = 72
+                Width = 84
+                Caption = 'メンバコメント'
+                ParentColor = False
+              end
+            end
+          end
         end
       end
       object Splitter2: TSplitter
         Cursor = crVSplit
         Left = 0
         Height = 5
-        Top = 544
+        Top = 422
         Width = 642
         Align = alBottom
         ResizeAnchor = akBottom
@@ -1304,7 +1504,7 @@ object FMainForm: TFMainForm
     left = 547
     top = 142
     Bitmap = {
-      4C690A0000001000000010000000000000000000000000000000000000000000
+      4C690B0000001000000010000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
@@ -1624,7 +1824,39 @@ object FMainForm: TFMainForm
       000000000000655C49216B5A44E13E485AE14541412F000000004A342817684E
       48CA474C4DEC414B535100000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      00003019040288490D2688490D808D5117D38C4F15D688490D8688490D272011
+      0303000000000000000000000000000000000000000000000000201103008849
+      0D268B4C12A89B6533F5B99573FFD1B9A3FFD2BBA5FFBB9876FF9C6735FA8B4D
+      12B188490D23100801010000000000000000000000000000000020110309894A
+      0D688D4E12FF9A622DFFB58E69FFCFB79FFFD0B8A1FFB7916DFF99622EFF8E50
+      14FF894A0D741008010A000000000000000000000000000000002011030C8B4C
+      0F709A5A1CFFA46326FF99591CFF915318FF905217FF99581CFFA36225FF9B5B
+      1EFF8B4B0F7E1008010B00000000000000001008010288490D2888490D88894A
+      0DDA925216FFA26124FFA76629FF99591CFF9C5B1EFFA76628FFA76629FF9C5B
+      1EFF8B4B0F7E1008010B0000000088490D3F8A4B10BB9C6736FEBC9877FFCEB5
+      9DFFBD9A78FF9F6B3AFF93551AFF915115FF965519FF955518FF905015FF9051
+      14FF894A0E8E1008010D0000000088490DED91571FFFB48C67FFD0B7A0FFD8C4
+      B1FFCFB79FFFB28A64FF945B25FF8D5015FFA16F3FFFC19F7FFFD2B9A3FFC09E
+      7EFFA06E3FFF8A4C11C688490D488E4E12FFA56427FF9A591DFF92551AFF9760
+      2BFF92551CFF955418FF905014FF955C25FFB0865FFFCDB39AFFD7C3B0FFCDB3
+      9AFFB0875FFF91561EFF89490DEF8E4E12FFA76629FFA76629FFA26124FF9756
+      1AFFA36124FFA05F22FF99591CFFA05F22FF9B5A1EFF92551AFF945B24FF9255
+      19FF9B5B1EFFA56427FF8E4E12FF8E4E12FFA76629FFA76629FFA26124FF9756
+      1AFFA36125FFA05F22FF99591CFFA36225FFA76629FFA36125FF97561AFFA261
+      24FFA76629FFA76629FF8E4E12FF8C4C10EEA66528FFA76629FFA26124FF9756
+      1AFFA36125FFA05F22FF99591CFFA36225FFA76629FFA36125FF97561AFFA261
+      24FFA76629FFA76629FF8E4E12FF88490D528B4B0FEC97571AFF9D5D20FF9656
+      1AFF9D5D20FF955519FF935317FFA16023FFA76629FFA36125FF97561AFFA261
+      24FFA76629FFA56427FF8C4C10EB0804000088490D0C88490D5B88490DBE8849
+      0DF388490DC188490D5F88490D6A8B4C0FDA955518FF9D5C1FFF96561AFF9C5B
+      1FFF955519FF8A4B0FE388490D4A000000000000000000000000201103018849
+      0D03582F080000000000000000004826060E88490D5188490DB588490DEA8849
+      0DB388490D4F88490D0908040000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000603309002011
+      0300000000000000000000000000
     }
   end
   object FClass_pop: TPopupMenu
@@ -1632,23 +1864,35 @@ object FMainForm: TFMainForm
     top = 79
     object MenuItem1: TMenuItem
       Caption = 'Scope'
-      object MenuItem3: TMenuItem
+      object FAddPrivate_mitem: TMenuItem
         Caption = 'Add Private'
+        OnClick = FAddPrivate_mitemClick
       end
-      object MenuItem4: TMenuItem
+      object FAddProtected_mitem: TMenuItem
         Caption = 'Add Protected'
+        OnClick = FAddProtected_mitemClick
       end
-      object MenuItem6: TMenuItem
+      object FAddPublic_mitem: TMenuItem
         Caption = 'Add Public'
+        OnClick = FAddPublic_mitemClick
       end
-      object MenuItem5: TMenuItem
+      object FAddPublished_mitem: TMenuItem
         Caption = 'Add Published'
+        OnClick = FAddPublished_mitemClick
       end
     end
   end
   object FFunction_pop: TPopupMenu
     left = 672
     top = 168
+    object FFunctionDelete_mitem: TMenuItem
+      Caption = 'Delete'
+      OnClick = FFunctionDelete_mitemClick
+    end
+    object FAddArgument_mitem: TMenuItem
+      Caption = 'Add Argument'
+      OnClick = FAddArgument_mitemClick
+    end
   end
   object FTreeBar_imgs: TImageList
     left = 624
@@ -1687,5 +1931,45 @@ object FMainForm: TFMainForm
       78F6797878F6797878F6797878F6797878F6797878F6797878F6797878F67978
       78F0797878C97978785407070704
     }
+  end
+  object FClassScope_pop: TPopupMenu
+    left = 771
+    top = 192
+    object FAddMember_mitem: TMenuItem
+      Caption = 'Add Member'
+      OnClick = FAddMember_mitemClick
+    end
+    object FAddFunction_mitem: TMenuItem
+      Caption = 'Add Function'
+      OnClick = FAddFunction_mitemClick
+    end
+    object FAddProperty_mitem: TMenuItem
+      Caption = 'Add Property'
+      OnClick = FAddProperty_mitemClick
+    end
+  end
+  object FArgument_pop: TPopupMenu
+    left = 559
+    top = 237
+    object FAddArgvMember: TMenuItem
+      Caption = 'Add Member'
+      OnClick = FAddArgvMemberClick
+    end
+  end
+  object FMember_pop: TPopupMenu
+    left = 688
+    top = 266
+    object FDeleteMember_mitem: TMenuItem
+      Caption = 'Delete'
+      OnClick = FDeleteMember_mitemClick
+    end
+  end
+  object FProperty_pop: TPopupMenu
+    left = 546
+    top = 308
+    object FDeleteProperty_mitem: TMenuItem
+      Caption = 'Delete'
+      OnClick = FDeleteProperty_mitemClick
+    end
   end
 end

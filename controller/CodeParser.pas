@@ -214,9 +214,9 @@ procedure TCodeParser.ParseClass(AElement: TCodeClass);
 var
   c, typ, nm: String;
   scope: TCodeElement;
-  member: TCodeMember;
+  member: TCodeClassMember;
   prop: TCodeClassProperty;
-  func: TCodeFunction;
+  func: TCodeClassFunction;
 begin
 	AElement.Code := GetPriorWord(FIndex - 1);
 	AElement.BaseClass := GetNextWord(FIndex + 1);
@@ -266,7 +266,7 @@ begin
       DefaultScope(scope);
       Inc(FIndex);
 			NextWord(nm, 1);
-      func := scope.Children.Append(TCodeFunction) as TCodeFunction;
+      func := scope.Children.Append(TCodeClassFunction) as TCodeClassFunction;
       func.Name := nm;
 
       if EggStrEqualSame(c, 'function') then
@@ -290,7 +290,7 @@ begin
       DefaultScope(scope);
 			typ := GetNextWord(FIndex + 1);
 			nm := GetPriorWord(FIndex - 1);
-      member := scope.Children.AppendMember();
+      member := scope.Children.Append(TCodeClassMember) as TCodeClassMember;
       member.Name := nm;
       member.MemberType := typ;
       NextToken(';', 1);
