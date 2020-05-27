@@ -36,7 +36,7 @@
         <PackageName Value="LCL"/>
       </Item3>
     </RequiredPackages>
-    <Units Count="6">
+    <Units Count="7">
       <Unit0>
         <Filename Value="CodeExplorer.lpr"/>
         <IsPartOfProject Value="True"/>
@@ -64,6 +64,13 @@
         <Filename Value="controller/CodeWriter.pas"/>
         <IsPartOfProject Value="True"/>
       </Unit5>
+      <Unit6>
+        <Filename Value="view/EditorFrame.pas"/>
+        <IsPartOfProject Value="True"/>
+        <ComponentName Value="FEditorFrame"/>
+        <HasResources Value="True"/>
+        <ResourceBaseClass Value="Frame"/>
+      </Unit6>
     </Units>
   </ProjectOptions>
   <CompilerOptions>
