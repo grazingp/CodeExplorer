@@ -1,41 +1,58 @@
 object FMainForm: TFMainForm
-  Left = 321
+  Left = 29
   Height = 747
   Top = 87
-  Width = 1031
+  Width = 1384
   Caption = 'Code Explorer'
   ClientHeight = 747
-  ClientWidth = 1031
+  ClientWidth = 1384
   Position = poWorkAreaCenter
   LCLVersion = '2.0.8.0'
   object Panel1: TPanel
     Left = 0
     Height = 747
     Top = 0
-    Width = 1031
+    Width = 1384
     Align = alClient
     BevelOuter = bvNone
     ClientHeight = 747
-    ClientWidth = 1031
+    ClientWidth = 1384
     TabOrder = 0
     object FEditor_pnl: TPanel
       Left = 0
       Height = 747
       Top = 0
-      Width = 1031
+      Width = 1105
       Align = alClient
       BevelOuter = bvNone
       ClientHeight = 747
-      ClientWidth = 1031
+      ClientWidth = 1105
       TabOrder = 0
       object FEditor_pages: TPageControl
         Left = 0
         Height = 747
         Top = 0
-        Width = 1031
+        Width = 1105
         Align = alClient
         TabOrder = 0
       end
+    end
+    object FProjectInspector_pnl: TPanel
+      Left = 1110
+      Height = 747
+      Top = 0
+      Width = 274
+      Align = alRight
+      BevelOuter = bvNone
+      TabOrder = 1
+    end
+    object Splitter1: TSplitter
+      Left = 1105
+      Height = 747
+      Top = 0
+      Width = 5
+      Align = alRight
+      ResizeAnchor = akRight
     end
   end
 end

@@ -7,7 +7,8 @@ uses
   cthreads,
   {$ENDIF}{$ENDIF}
   Interfaces, // this includes the LCL widgetset
-  Forms, MainForm, CodeTree, CodeParser, CodeBinder, CodeWriter, EditorFrame
+  Forms, MainForm, CodeTree, CodeParser, CodeBinder, CodeWriter, EditorFrame,
+  ProjectInspectorFrame
   { you can add units after this };
 
 {$R *.res}

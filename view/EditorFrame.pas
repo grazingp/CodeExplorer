@@ -165,6 +165,7 @@ type
 		constructor Create(TheOwner: TComponent); override;
     destructor Destroy; override;
     procedure OpenFile(const AFileName: String);
+    property FileName: String read FFileName;
   end;
 
 implementation
