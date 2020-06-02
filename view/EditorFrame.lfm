@@ -6,8 +6,8 @@ object FEditorFrame: TFEditorFrame
   ClientHeight = 714
   ClientWidth = 1034
   TabOrder = 0
-  DesignLeft = 310
-  DesignTop = 87
+  DesignLeft = 280
+  DesignTop = 111
   object Splitter1: TSplitter
     Left = 384
     Height = 714
@@ -86,7 +86,7 @@ object FEditorFrame: TFEditorFrame
           Height = 300
           Top = 0
           Width = 645
-          PageIndex = 6
+          PageIndex = 8
           Align = alClient
           TabOrder = 0
           object FFunction_page: TPage
@@ -985,7 +985,6 @@ object FEditorFrame: TFEditorFrame
                 Top = 161
                 Width = 630
                 Anchors = [akTop, akLeft, akRight]
-                Lines.Strings = (                )
                 TabOrder = 4
               end
               object FParameterName_ed: TEdit
@@ -1117,6 +1116,157 @@ object FEditorFrame: TFEditorFrame
                 Top = 65
                 Width = 296
                 TabOrder = 2
+              end
+            end
+          end
+          object FEnum_page: TPage
+            object Panel15: TPanel
+              Left = 0
+              Height = 300
+              Top = 0
+              Width = 645
+              Align = alClient
+              BevelOuter = bvNone
+              ClientHeight = 300
+              ClientWidth = 645
+              TabOrder = 0
+              object FEnumComment_ed: TMemo
+                Left = 5
+                Height = 40
+                Top = 67
+                Width = 630
+                Anchors = [akTop, akLeft, akRight]
+                Lines.Strings = (                )
+                TabOrder = 1
+              end
+              object FEnumName_ed: TEdit
+                Left = 116
+                Height = 22
+                Top = 4
+                Width = 465
+                TabOrder = 0
+              end
+              object Label28: TLabel
+                Left = 7
+                Height = 16
+                Top = 6
+                Width = 35
+                Caption = 'Name'
+                ParentColor = False
+              end
+              object Label29: TLabel
+                Left = 7
+                Height = 16
+                Top = 46
+                Width = 86
+                Caption = 'Enum コメント'
+                ParentColor = False
+              end
+            end
+          end
+          object FEnumAttr_page: TPage
+            object Panel16: TPanel
+              Left = 0
+              Height = 300
+              Top = 0
+              Width = 645
+              Align = alClient
+              BevelOuter = bvNone
+              ClientHeight = 300
+              ClientWidth = 645
+              TabOrder = 0
+              object FEnumAttrComment_ed: TMemo
+                Left = 5
+                Height = 40
+                Top = 67
+                Width = 630
+                Anchors = [akTop, akLeft, akRight]
+                Lines.Strings = (                )
+                TabOrder = 1
+              end
+              object FEnumAttrName_ed: TEdit
+                Left = 116
+                Height = 22
+                Top = 4
+                Width = 465
+                TabOrder = 0
+              end
+              object Label30: TLabel
+                Left = 7
+                Height = 16
+                Top = 6
+                Width = 35
+                Caption = 'Name'
+                ParentColor = False
+              end
+              object Label31: TLabel
+                Left = 7
+                Height = 16
+                Top = 46
+                Width = 101
+                Caption = 'Enum 値 コメント'
+                ParentColor = False
+              end
+            end
+          end
+          object FSet_page: TPage
+            object Panel18: TPanel
+              Left = 0
+              Height = 300
+              Top = 0
+              Width = 645
+              Align = alClient
+              BevelOuter = bvNone
+              ClientHeight = 300
+              ClientWidth = 645
+              TabOrder = 0
+              object FSetEnum_cmb: TComboBox
+                Left = 116
+                Height = 20
+                Top = 35
+                Width = 296
+                ItemHeight = 19
+                TabOrder = 1
+              end
+              object Label26: TLabel
+                Left = 7
+                Height = 16
+                Top = 37
+                Width = 67
+                Caption = 'Enum Type'
+                ParentColor = False
+              end
+              object FSetComment_ed: TMemo
+                Left = 5
+                Height = 40
+                Top = 91
+                Width = 630
+                Anchors = [akTop, akLeft, akRight]
+                Lines.Strings = (                )
+                TabOrder = 2
+              end
+              object FSetName_ed: TEdit
+                Left = 116
+                Height = 22
+                Top = 4
+                Width = 465
+                TabOrder = 0
+              end
+              object Label32: TLabel
+                Left = 7
+                Height = 16
+                Top = 6
+                Width = 35
+                Caption = 'Name'
+                ParentColor = False
+              end
+              object Label33: TLabel
+                Left = 7
+                Height = 16
+                Top = 70
+                Width = 72
+                Caption = 'Set コメント'
+                ParentColor = False
               end
             end
           end
@@ -1738,7 +1888,7 @@ object FEditorFrame: TFEditorFrame
         ParentShowHint = False
         TabOrder = 0
         object FAccept_btn: TToolButton
-          Left = 16
+          Left = 6
           Hint = '変更を適用'
           Top = 2
           Caption = 'FAccept_btn'
@@ -1754,7 +1904,7 @@ object FEditorFrame: TFEditorFrame
           Style = tbsDivider
         end
         object FCancel_btn: TToolButton
-          Left = 39
+          Left = 29
           Hint = '変更をキャンセル'
           Top = 2
           ImageIndex = 1
@@ -2332,7 +2482,7 @@ object FEditorFrame: TFEditorFrame
     left = 575
     top = 170
     Bitmap = {
-      4C690D0000001000000010000000000000000000000000000000000000000000
+      4C690F0000001000000010000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
@@ -2748,7 +2898,71 @@ object FEditorFrame: TFEditorFrame
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
       0000000000000000000000000000000000000000000000000000000000000000
-      0000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000005CB4
+      7E0515291D010000000000000000000000000000000000000000000000000000
+      000000000000000000000000000000000000000000000000000055A6741D78EB
+      A5B678EBA5740E1B130A00000000000000000000000000000000000000000000
+      000000000000000000000000000000000000000000004D986B2178EBA5B678EB
+      A5FB76E19AFF73C379B0060B0609000000000000000000000000000000000000
+      000000000000000000000000000000000000468A612478EBA5B278EBA5FB76E1
+      99FF71B267FF72BB71AF060B0609000000000E1B130078EBA5125CB47E3A0000
+      00000000000000000000000000003F7C572678EBA5AF78EBA5FC77DF98FF71B4
+      69FF72BB71A60D160D1100000000070D090078EBA51E78EBA5C678EBA5E055A6
+      74550000000000000000386F4D2878EBA5AD78EBA5FD77DE97FF72B56BFF72BA
+      719F142215160000000000000000070D090978EBA5B378EBA5FF78EBA5FF78EB
+      A5DC4D986B583161442878EBA5AC78EBA5FF76DD96FF72B76DFF72BA709B1B2D
+      1C1A000000000000000000000000070D090178EBA53578EBA5E278EBA5FF78EB
+      A5FF78EBA5F378EBA5EA78EBA5FF76DD95FF72B86EFF72B96F992139231C0000
+      0000000000000000000000000000000000000E1B130278EBA53978EBA5DE78EB
+      A5FF78EBA5FF78EBA5FF76DC95FF72B96FFE72B96E9928452B1D000000000000
+      0000000000000000000000000000000000000000000015291D0378EBA53D78EB
+      A5D978EBA5FF76DD95FF72BA6FFE72B86E9A2F51321B00000000000000000000
+      00000000000000000000000000000000000000000000000000001C37260278EA
+      A33D76D890CF72B96EFB72B96F9A365C3A190000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      000028452A0C4373471500000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      0000000000000000000000000000000000000000000000000000000000000000
+      00000000000000000000000000008EDEA61F89DCA2B588DCA1CB8ADDA3C494E1
+      ABA39CE5B28B9CE5B26652795E1C000000000000000000000000000000000000
+      000000000000000000000000000089DCA2AD80D89AFF80D99AFF87DCA0FF9AE5
+      B1FF9CE5B2FF9CE5B2F252795E75000000000000000000000000000000000000
+      000000000000000000000000000089DCA2C280D89AFF83DA9CFF92E1AAFFA7E8
+      BAFFBFEECEFFB0EBC2FA52795E80000000000000000000000000000000000000
+      000000000000000000000000000089DCA2C29ADFA9FFE0F3D0FFADE9BFFFD3F4
+      DDFFE4F8EAFFABEABEFA52795E80000000000000000000000000000000000000
+      000000000000000000000000000089DCA2C28EDDA4FFE6F7DEFFF9FEFAFFE9F9
+      EEFFB0EBC2FF9CE5B2FA52795E80000000000000000000000000000000000000
+      000000000000000000000000000089DCA2C282D99BFF98E1AEFFC7F1D4FFB2EB
+      C3FF9CE5B2FF9CE5B2FA52795E80000000000000000000000000000000000000
+      000000000000000000000000000089DCA3A781D99BFF8ADDA2FF9CE5B2FF9CE5
+      B2FF9CE5B2FF9CE5B2EF52795E72000000000000000000000000000000000000
+      00000000000000000000000000008EDEA6148ADDA3988CDEA4AA99E4AF7B9CE5
+      B2749CE5B2739CE5B25152795E13000000000000000000000000000000000000
+      00000000000000000000000000008EDEA6148BDDA39A89DCA2B38BDDA4AC94E1
+      AB8B9CE5B2739CE5B25152795E134A7557248BDDA38389DCA2B28ADCA2B396E3
+      AD879CE5B2759CE5B25E9CE5B20B89DCA3A780D89AFF80D89AFF86DBA0FF99E4
+      B0FF9CE5B2FF9CE5B2EF52795E724573538481D99BFD80D89AFF87DCA0FF98E4
+      AEFF9CE5B2FF9CE5B2FF9CE5B26C89DCA2C280D89AFF82D99CFF91E0A9FFA4E7
+      B9FFB8ECC8FFADEABFFA52795E804472528680D89BFF81D89BFF92E1AAFF9EE6
+      B4FFC4F0D1FFA6E8BAFF9CE5B28689DCA2C297DFA8FFD7F1CCFFA7E8BBFFCEF2
+      D9FFE5F8EBFFAEEAC0FA52795E8044725286A9E4B1FFC5EDC4FFAAE8BAFFD2F3
+      DDFFEBFAF0FFA8E9BCFF9CE5B28689DCA2C291DEA5FFECF8E1FFF5FDF7FFEBFA
+      F0FFB5ECC6FF9CE5B2FA52795E8044725286A0E1ADFFE3F6E0FFF3FCF3FFF0FB
+      F3FFB2EBC4FF9DE6B3FF9CE5B28689DCA2C282D99CFF9AE2B0FFD0F3DAFFB8EC
+      C7FF9CE5B2FF9CE5B2FA52795E804472528680D89BFF9DE3B2FFD1F3DBFFB4EC
+      C5FF9EE6B4FF9CE5B2FF9CE5B28689DCA2AD81D99BFF8BDDA3FF9CE5B2FF9CE5
+      B2FF9CE5B2FF9CE5B2F252795E754573528581D99BFE8DDEA5FF9AE4B0FF9CE5
+      B2FF9CE5B2FF9CE5B2FF9CE5B2738EDEA61F89DCA2B48BDEA4C299E4B0929CE5
+      B28C9CE5B28B9CE5B26552795E1B4A7557318ADDA29B8BDEA4BC98E3AE989CE5
+      B28C9CE5B28C9CE5B2759CE5B211
     }
   end
   object FClass_pop: TPopupMenu
@@ -3030,5 +3244,29 @@ object FEditorFrame: TFEditorFrame
       8E4D000000000000000000000000000000000000000000000000AAA9A92AAAA9
       A9DBAAA9A994AAA9A90100000000
     }
+  end
+  object FEnum_pop: TPopupMenu
+    left = 445
+    top = 171
+    object FAddEnumAttr_mitem: TMenuItem
+      Caption = 'Add Attribute'
+      OnClick = FAddEnumAttr_mitemClick
+    end
+  end
+  object FEnumAttr_pop: TPopupMenu
+    left = 449
+    top = 245
+    object FDeleteEnumAttr_mitem: TMenuItem
+      Caption = 'Delete'
+      OnClick = FDeleteEnumAttr_mitemClick
+    end
+  end
+  object FSet_pop: TPopupMenu
+    left = 493
+    top = 120
+    object FDeleteSet_mitem: TMenuItem
+      Caption = 'Delete'
+      OnClick = FDeleteSet_mitemClick
+    end
   end
 end

@@ -35,6 +35,13 @@ type
     FCodeParse_btn: TToolButton;
     FCodeWrite_btn: TToolButton;
     FCode_ed: TSynEdit;
+    FSetComment_ed: TMemo;
+    FSetName_ed: TEdit;
+    FSetEnum_cmb: TComboBox;
+    FEnumComment_ed: TMemo;
+    FEnumAttrComment_ed: TMemo;
+    FEnumName_ed: TEdit;
+    FEnumAttrName_ed: TEdit;
     FWriteCode_ed: TSynEdit;
     FCode_tree: TTreeView;
     FDeleteMember_mitem: TMenuItem;
@@ -97,8 +104,15 @@ type
     Label23: TLabel;
     Label24: TLabel;
     Label25: TLabel;
+    Label26: TLabel;
     Label27: TLabel;
+    Label28: TLabel;
+    Label29: TLabel;
     Label3: TLabel;
+    Label30: TLabel;
+    Label31: TLabel;
+    Label32: TLabel;
+    Label33: TLabel;
     Label4: TLabel;
     Label5: TLabel;
     Label6: TLabel;
@@ -111,6 +125,12 @@ type
     FConstMember_page: TPage;
     FDeleteConstMember_mitem: TMenuItem;
     FSource_pnl: TPanel;
+    FEnum_page: TPage;
+    FEnumAttr_page: TPage;
+    FDeleteEnumAttr_mitem: TMenuItem;
+    FAddEnumAttr_mitem: TMenuItem;
+    FSet_page: TPage;
+    FDeleteSet_mitem: TMenuItem;
     Panel10: TPanel;
     Panel11: TPanel;
     Panel12: TPanel;
@@ -118,7 +138,10 @@ type
     Panel14: TPanel;
     FCode_pnl: TPanel;
     FWrite_pnl: TPanel;
+    Panel15: TPanel;
+    Panel16: TPanel;
     Panel17: TPanel;
+    Panel18: TPanel;
     Panel2: TPanel;
     Panel3: TPanel;
     Panel4: TPanel;
@@ -129,6 +152,9 @@ type
     Panel9: TPanel;
     FParameter_pop: TPopupMenu;
     FConstMember_pop: TPopupMenu;
+    FEnum_pop: TPopupMenu;
+    FEnumAttr_pop: TPopupMenu;
+    FSet_pop: TPopupMenu;
     Splitter1: TSplitter;
     Splitter2: TSplitter;
     SynFreePascalSyn1: TSynFreePascalSyn;
@@ -142,6 +168,7 @@ type
     procedure FAccept_btnClick(Sender: TObject);
     procedure FAddArgument_mitemClick(Sender: TObject);
     procedure FAddArgvParameter_mitemClick(Sender: TObject);
+    procedure FAddEnumAttr_mitemClick(Sender: TObject);
     procedure FAddFunction_mitemClick(Sender: TObject);
     procedure FAddMember_mitemClick(Sender: TObject);
     procedure FAddPrivate_mitemClick(Sender: TObject);
@@ -161,9 +188,11 @@ type
     procedure FCode_treeMouseEnter(Sender: TObject);
     procedure FCode_treeSelectionChanged(Sender: TObject);
     procedure FDeleteConstMember_mitemClick(Sender: TObject);
+    procedure FDeleteEnumAttr_mitemClick(Sender: TObject);
     procedure FDeleteMember_mitemClick(Sender: TObject);
     procedure FDeleteParameter_mitemClick(Sender: TObject);
     procedure FDeleteProperty_mitemClick(Sender: TObject);
+    procedure FDeleteSet_mitemClick(Sender: TObject);
     procedure FDeleteSpecialize_mitemClick(Sender: TObject);
     procedure FFunctionDelete_mitemClick(Sender: TObject);
     procedure FPasteEditor_btnClick(Sender: TObject);
@@ -178,11 +207,18 @@ type
     procedure DoChangeConstMemberDefaultValue(Sender: TObject);
     procedure DoChangeConstMemberName(Sender: TObject);
     procedure DoChangeConstMemberType(Sender: TObject);
+    procedure DoChangeEnumAttrComment(Sender: TObject);
+    procedure DoChangeEnumAttrName(Sender: TObject);
+    procedure DoChangeEnumComment(Sender: TObject);
+    procedure DoChangeEnumName(Sender: TObject);
     procedure DoChangeParameterComment(Sender: TObject);
     procedure DoChangeParameterDefaultValue(Sender: TObject);
     procedure DoChangeParameterMemberType(Sender: TObject);
     procedure DoChangeParameterName(Sender: TObject);
     procedure DoChangeParameterType(Sender: TObject);
+    procedure DoChangeSetComment(Sender: TObject);
+    procedure DoChangeSetEnum(Sender: TObject);
+    procedure DoChangeSetName(Sender: TObject);
     procedure DoChangeSpecializeBaseClass(Sender: TObject);
     procedure DoChangeSpecializeName(Sender: TObject);
     procedure DoChangeSpecializeTypeClass(Sender: TObject);
@@ -209,6 +245,7 @@ type
     function AddScope(AScope: String): TTreeNode;
     procedure AddFunction();
     procedure AddClassMember();
+    procedure AddEnumAttr();
     procedure AddClassProperty();
   public
 		constructor Create(TheOwner: TComponent); override;
@@ -229,6 +266,9 @@ const
   EDITOR_SPECIALIZE_PAGE = 4;
   EDITOR_PARAMETER_PAGE = 5;
   EDITOR_CONST_MEMBER_PAGE = 6;
+  EDITOR_ENUM_PAGE = 7;
+  EDITOR_ENUM_ATTR_PAGE = 8;
+  EDITOR_SET_PAGE = 9;
 
   CODE_WIDTH = 384;
 
@@ -415,6 +455,80 @@ begin
   end;
 end;
 
+procedure TFEditorFrame.DoChangeEnumAttrComment(Sender: TObject);
+var
+  node: TTreeNode;
+  attr: TCodeEnumAttr;
+  element: TCodeElement;
+begin
+  node := FCode_tree.Selected;
+  if Assigned(node) then
+  begin
+    if not Assigned(node.Data) then exit;
+    element := TCodeElement(node.Data);
+    if element is TCodeEnumAttr then
+    begin
+      attr := element as TCodeEnumAttr;
+      attr.Comment := FEnumAttrComment_ed.Text;
+    end;
+  end;
+end;
+
+procedure TFEditorFrame.DoChangeEnumAttrName(Sender: TObject);
+var
+  node: TTreeNode;
+  attr: TCodeEnumAttr;
+  element: TCodeElement;
+begin
+  node := FCode_tree.Selected;
+  if Assigned(node) then
+  begin
+    if not Assigned(node.Data) then exit;
+    element := TCodeElement(node.Data);
+    if element is TCodeEnumAttr then
+    begin
+      attr := element as TCodeEnumAttr;
+      attr.Name := FEnumAttrName_ed.Text;
+    end;
+  end;
+end;
+
+procedure TFEditorFrame.DoChangeEnumComment(Sender: TObject);
+var
+  node: TTreeNode;
+  element, enum: TCodeEnum;
+begin
+  node := FCode_tree.Selected;
+  if Assigned(node) then
+  begin
+    if not Assigned(node.Data) then exit;
+    element := TCodeEnum(node.Data);
+    if element is TCodeEnum then
+    begin
+      enum := element as TCodeEnum;
+      enum.Comment := FEnumComment_ed.Text;
+    end;
+  end;
+end;
+
+procedure TFEditorFrame.DoChangeEnumName(Sender: TObject);
+var
+  node: TTreeNode;
+  element, enum: TCodeEnum;
+begin
+  node := FCode_tree.Selected;
+  if Assigned(node) then
+  begin
+    if not Assigned(node.Data) then exit;
+    element := TCodeEnum(node.Data);
+    if element is TCodeEnum then
+    begin
+      enum := element as TCodeEnum;
+      enum.Name := FEnumName_ed.Text;
+    end;
+  end;
+end;
+
 procedure TFEditorFrame.DoChangeParameterComment(Sender: TObject);
 var
   node: TTreeNode;
@@ -506,6 +620,63 @@ begin
     begin
       param := element as TCodeFunctionParameter;
       param.ParameterType := FParameterType_cmb.Text;
+    end;
+  end;
+end;
+
+procedure TFEditorFrame.DoChangeSetComment(Sender: TObject);
+var
+  node: TTreeNode;
+  element: TCodeElement;
+  eset: TCodeSet;
+begin
+  node := FCode_tree.Selected;
+  if Assigned(node) then
+  begin
+    if not Assigned(node.Data) then exit;
+    element := TCodeElement(node.Data);
+    if element is TCodeSet then
+    begin
+      eset := element as TCodeSet;
+      eset.Comment := FSetComment_ed.Text;
+    end;
+  end;
+end;
+
+procedure TFEditorFrame.DoChangeSetEnum(Sender: TObject);
+var
+  node: TTreeNode;
+  element: TCodeElement;
+  eset: TCodeSet;
+begin
+  node := FCode_tree.Selected;
+  if Assigned(node) then
+  begin
+    if not Assigned(node.Data) then exit;
+    element := TCodeElement(node.Data);
+    if element is TCodeSet then
+    begin
+      eset := element as TCodeSet;
+      eset.Enum := FSetEnum_cmb.Text;
+    end;
+  end;
+end;
+
+procedure TFEditorFrame.DoChangeSetName(Sender: TObject);
+var
+  node: TTreeNode;
+  element: TCodeElement;
+  eset: TCodeSet;
+begin
+  node := FCode_tree.Selected;
+  if Assigned(node) then
+  begin
+    if not Assigned(node.Data) then exit;
+    element := TCodeElement(node.Data);
+    if element is TCodeSet then
+    begin
+      eset := element as TCodeSet;
+      eset.Name := FSetName_ed.Text;
     end;
   end;
 end;
@@ -964,6 +1135,27 @@ begin
   end;
 end;
 
+procedure TFEditorFrame.AddEnumAttr();
+var
+  node, attrNode: TTreeNode;
+  element: TCodeElement;
+  enum: TCodeEnum;
+  attr: TCodeEnumAttr;
+begin
+  node := FCode_tree.Selected;
+  if not Assigned(node) then exit;
+  element := TCodeElement(node.Data);
+  if element is TCodeEnum then
+  begin
+  	enum := element as TCodeEnum;
+    attr := enum.Children.Append(TCodeEnumAttr) as TCodeEnumAttr;
+    attr.Name := 'Attribute';
+    attrNode := FCode_tree.Items.AddChildObject(node, attr.Name, attr);
+    BindElement(attr);
+    FCode_tree.Selected := attrNode;
+  end;
+end;
+
 procedure TFEditorFrame.AddClassProperty();
 var
   node, propNode: TTreeNode;
@@ -997,8 +1189,9 @@ begin
   //FCode_ed.Font.Name := 'Meiryo';
   FCode_ed.Font.Quality := fqAntialiased;
   FFunctionContent_ed.Font.Assign(FCode_ed.Font);
-
   FFunctionContent_ed.Keystrokes.Assign(FCode_ed.Keystrokes);
+  FWriteCode_ed.Font.Assign(FCode_ed.Font);
+  FWriteCode_ed.Keystrokes.Assign(FCode_ed.Keystrokes);
 
   FCode_pnl.Width := CODE_WIDTH;
   FWrite_pnl.Visible := False;
@@ -1064,6 +1257,11 @@ begin
       AppendArgvParameter(arg);
     end;
   end;
+end;
+
+procedure TFEditorFrame.FAddEnumAttr_mitemClick(Sender: TObject);
+begin
+  AddEnumAttr();
 end;
 
 procedure TFEditorFrame.FAddMember_mitemClick(Sender: TObject);
@@ -1215,6 +1413,9 @@ var
   sp: TCodeSpecialize;
   param: TCodeFunctionParameter;
   constMem: TCodeConstMember;
+  enum: TCodeEnum;
+  enumAttr: TCodeEnumAttr;
+  eset: TCodeSet;
 begin
   pageIndex := -1;
   node := FCode_tree.Selected;
@@ -1260,6 +1461,32 @@ begin
 
       FCode_tree.PopupMenu := FConstMember_pop;
       pageIndex := EDITOR_CONST_MEMBER_PAGE;
+    end
+    else if element is TCodeEnum then
+    begin
+      enum := element as TCodeEnum;
+      FEnumName_ed.OnChange := nil;
+      FEnumName_ed.Text := enum.Name;
+      FEnumName_ed.OnChange := @DoChangeEnumName;
+      FEnumComment_ed.OnChange := nil;
+      FEnumComment_ed.Text := enum.Comment;
+      FEnumComment_ed.OnChange := @DoChangeEnumComment;
+
+      FCode_tree.PopupMenu := FEnum_pop;
+      pageIndex := EDITOR_ENUM_PAGE;
+    end
+    else if element is TCodeEnumAttr then
+    begin
+      enumAttr := element as TCodeEnumAttr;
+      FEnumAttrName_ed.OnChange := nil;
+      FEnumAttrName_ed.Text := enumAttr.Name;
+      FEnumAttrName_ed.OnChange := @DoChangeEnumAttrName;
+      FEnumAttrComment_ed.OnChange := nil;
+      FEnumAttrComment_ed.Text := enumAttr.Comment;
+      FEnumAttrComment_ed.OnChange := @DoChangeEnumAttrComment;
+
+      FCode_tree.PopupMenu := FEnumAttr_pop;
+      pageIndex := EDITOR_ENUM_ATTR_PAGE;
     end
     else if element is TCodeFunction then
     begin
@@ -1344,6 +1571,22 @@ begin
       FCode_tree.PopupMenu := FMember_pop;
       pageIndex := EDITOR_MEMBER_PAGE;
     end
+    else if element is TCodeSet then
+    begin
+      eset := element as TCodeSet;
+      FSetName_ed.OnChange := nil;
+      FSetName_ed.Text := eset.Name;
+      FSetName_ed.OnChange := @DoChangeSetName;
+      FSetEnum_cmb.OnChange := nil;
+      FSetEnum_cmb.Text := eset.Enum;
+      FSetEnum_cmb.OnChange := @DoChangeSetEnum;
+      FSetComment_ed.OnChange := nil;
+      FSetComment_ed.Text := eset.Comment;
+      FSetComment_ed.OnChange := @DoChangeSetComment;
+
+      FCode_tree.PopupMenu := FSet_pop;
+      pageIndex := EDITOR_SET_PAGE;
+    end
     else if element is TCodeSpecialize then
     begin
       sp := element as TCodeSpecialize;
@@ -1370,6 +1613,11 @@ begin
   DeleteElement(TCodeConstMember.ClassType);
 end;
 
+procedure TFEditorFrame.FDeleteEnumAttr_mitemClick(Sender: TObject);
+begin
+  DeleteElement(TCodeEnumAttr.ClassType);
+end;
+
 procedure TFEditorFrame.FDeleteMember_mitemClick(Sender: TObject);
 begin
   DeleteElement(TCodeMember.ClassType);
@@ -1383,6 +1631,11 @@ end;
 procedure TFEditorFrame.FDeleteProperty_mitemClick(Sender: TObject);
 begin
   DeleteElement(TCodeClassProperty.ClassType);
+end;
+
+procedure TFEditorFrame.FDeleteSet_mitemClick(Sender: TObject);
+begin
+  DeleteElement(TCodeSet.ClassType);
 end;
 
 procedure TFEditorFrame.FDeleteSpecialize_mitemClick(Sender: TObject);

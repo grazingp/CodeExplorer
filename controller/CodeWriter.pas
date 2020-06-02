@@ -30,6 +30,8 @@ type
     procedure WriteComment(AComment: TCodeComment);
     procedure WriteUses(AUses: TCodeUses);
     procedure WriteSpecialize(ASpecialize: TCodeSpecialize);
+    procedure WriteEnum(AEnum: TCodeEnum);
+    procedure WriteSet(ASet: TCodeSet);
     procedure WriteClass(AClass: TCodeClass);
     procedure WriteClassScope(const AClassName: String; AClassScape: TCodeClassScope; var ACode: String);
     procedure WriteMember(AMember: TCodeMember; var ACode: String);
@@ -88,6 +90,16 @@ begin
   else if AElement is TCodeSpecialize then
   begin
     WriteSpecialize(AElement as TCodeSpecialize);
+    exit;
+  end
+  else if AElement is TCodeEnum then
+  begin
+  	WriteEnum(AElement as TCodeEnum);
+    exit;
+  end
+  else if AElement is TCodeSet then
+  begin
+  	WriteSet(AElement as TCodeSet);
     exit;
   end
   else if AElement is TCodeClass then
@@ -165,6 +177,35 @@ var
   code: String;
 begin
   code := '  ' + ASpecialize.Name + ' = specialize ' + ASpecialize.BaseClass + '<' + ASpecialize.TypeClass + '>;' + #10#10;
+  FInterfaceCode += code;
+end;
+
+procedure TCodeWriter.WriteEnum(AEnum: TCodeEnum);
+var
+  i: Integer;
+  attr: TCodeEnumAttr;
+  code: String;
+begin
+	code := '  ' + AEnum.Name + ' = (';
+
+  for i := 0 to Pred(AEnum.Children.Count) do
+  begin
+    attr := AEnum.Children[i] as TCodeEnumAttr;
+    if i > 0 then
+    begin
+      code += ', ';
+    end;
+    code += attr.Name;
+  end;
+  code += ');' + #10#10;
+  FInterfaceCode += code;
+end;
+
+procedure TCodeWriter.WriteSet(ASet: TCodeSet);
+var
+  code: String;
+begin
+	code := '  ' + ASet.Name + ' set of ' + ASet.Enum + ';' + #10#10;
   FInterfaceCode += code;
 end;
 
@@ -289,7 +330,7 @@ begin
     begin
 	    AContent += AClassName + '.';
     end;
-    AContent += AFunc.Name + args + ';';
+    AContent += AFunc.Name + args + ';' + #10;
     AContent += AFunc.Content + ';';
   end
   else

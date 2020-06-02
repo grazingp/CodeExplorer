@@ -65,6 +65,44 @@ type
   TCodeUsesUnit = class(TCodeElement)
   end;
 
+  { TCodeEnum }
+
+  TCodeEnum = class(TCodeElement)
+  private
+    FComment: String;
+    function GetName: String;
+    procedure SetName(AValue: String);
+  public
+  	property Name: String read GetName write SetName;
+    property Comment: String read FComment write FComment;
+  end;
+
+  { TCodeEnumAttr }
+
+  TCodeEnumAttr = class(TCodeElement)
+  private
+    FComment: String;
+    function GetName: String;
+    procedure SetName(AValue: String);
+  public
+  	property Name: String read GetName write SetName;
+    property Comment: String read FComment write FComment;
+  end;
+
+  { TCodeSet }
+  TCodeSet = class(TCodeElement)
+  private
+    FComment: String;
+    FEnum: String;
+    function GetName: String;
+    procedure SetEnum(AValue: String);
+    procedure SetName(AValue: String);
+  public
+  	property Name: String read GetName write SetName;
+    property Enum: String read FEnum write SetEnum;
+    property Comment: String read FComment write FComment;
+  end;
+
   { TCodeSpecialize }
 
   TCodeSpecialize = class(TCodeElement)
@@ -247,6 +285,48 @@ type
 
 
 implementation
+
+{ TCodeSet }
+
+function TCodeSet.GetName: String;
+begin
+	Result := inherited Code;
+end;
+
+procedure TCodeSet.SetEnum(AValue: String);
+begin
+  if FEnum = AValue then Exit;
+  FEnum := AValue;
+end;
+
+procedure TCodeSet.SetName(AValue: String);
+begin
+	inherited Code := AValue;
+end;
+
+{ TCodeEnum }
+
+function TCodeEnum.GetName: String;
+begin
+  Result := inherited Code;
+end;
+
+procedure TCodeEnum.SetName(AValue: String);
+begin
+	inherited Code := AValue;
+end;
+
+{ TCodeEnumAttr }
+
+function TCodeEnumAttr.GetName: String;
+begin
+  Result := inherited Code;
+end;
+
+procedure TCodeEnumAttr.SetName(AValue: String);
+begin
+	inherited Code := AValue;
+end;
 
 { TCodeConstMember }
 

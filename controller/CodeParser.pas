@@ -27,6 +27,8 @@ type
     procedure ParseUses(ACodeUses: TCodeUses);
     procedure ParseComment(AElement: TCodeComment; AStart, AEnd: String);
 		procedure ParseSpecialize(ASpecialize: TCodeSpecialize);
+    procedure ParseEnum(AEnum: TCodeEnum);
+    procedure ParseSet(ASet: TCodeSet);
   	procedure ParseClass(AElement: TCodeClass);
     procedure ParseClassProperty(AProp: TCodeClassProperty);
     procedure ParseFunction(AFunc: TCodeFunction);
@@ -122,6 +124,14 @@ begin
       FCodeSection := csUses;
       ParseUses(AElement.Children.Append(TCodeUses) as TCodeUses);
 			continue;
+    end
+    else if EggStrEqual(c, '(') then
+    begin
+			ParseEnum(AElement.Children.Append(TCodeEnum) as TCodeEnum);
+    end
+    else if EggStrEqualSame(c, 'set') then
+    begin
+			ParseSet(AElement.Children.Append(TCodeSet) as TCodeSet);
     end
     else if EggStrEqualSame(c, 'specialize') then
     begin
@@ -267,6 +277,45 @@ begin
   NextWord(t, 1);
   ASpecialize.TypeClass := t;
 	NextToken(';', 1);
+end;
+
+procedure TCodeParser.ParseEnum(AEnum: TCodeEnum);
+var
+  i: Integer;
+  c, nm: String;
+  attr: TCodeEnumAttr;
+begin
+  GetPriorWord(FIndex - 1, nm);
+  AEnum.Name := nm;
+
+  i := FIndex + 1;
+  while i < Length(FTokens) do
+  begin
+    i := GetNextNotSpace(i, c);
+    if EggStrEqual(c, ')') then
+    begin
+      FIndex := i + 1;
+      break;
+    end
+    else if EggStrEqual(c, ',') then
+    begin
+      i := GetNextNotSpace(i + 1, c);
+		end;
+    attr := AEnum.Children.Append(TCodeEnumAttr) as TCodeEnumAttr;
+    attr.Name := c;
+    Inc(i);
+  end;
+end;
+
+procedure TCodeParser.ParseSet(ASet: TCodeSet);
+var
+  nm, enum: String;
+begin
+	GetPriorWord(FIndex - 1, nm);
+  FIndex := GetNextToken('of', FIndex);
+	GetNextWord(FIndex + 1, enum);
+  ASet.Name := nm;
+  ASet.Enum := enum;
 end;
 
 procedure TCodeParser.ParseClass(AElement: TCodeClass);

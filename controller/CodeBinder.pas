@@ -23,6 +23,8 @@ const
   DefaultFunctionArgvImageIndex = 10;
   DefaultSpecializeImageIndex = 11;
   DefaultConstImageIndex = 12;
+  DefaultEnumImageIndex = 13;
+  DefaultSetImageIndex = 14;
 
 type
 
@@ -44,11 +46,16 @@ type
     FUnitImageIndex: Integer;
 		FFunctionArgvImageIndex: Integer;
     FSpecializeImageIndex: Integer;
+    FEnumImageIndex: Integer;
+    FSetImageIndex: Integer;
 
     procedure BindUnit(ACodeTree: TCodeTree; AUnitNode: TTreeNode);
     procedure BindUses(ACodeTree: TCodeTree; AUsesNode: TTreeNode);
     procedure BindType(ACodeTree: TCodeTree; ATypeNode: TTreeNode);
     procedure BindConst(ACodeTree: TCodeTree; ATreeView: TTreeView);
+    procedure BindSet(ASet: TCodeSet; ASetNode: TTreeNode);
+    procedure BindEnum(AEnum: TCodeEnum; AEnumNode: TTreeNode);
+    procedure BindEnumAttr(AEnumAttr: TCodeEnumAttr; AEnumAttrNode: TTreeNode);
     procedure BindClassScope(AClassScope: TCodeClassScope; AScopeNode: TTreeNode);
     procedure BindMember(AMember: TCodeMember; AMemberNode: TTreeNode);
     procedure BindConstMember(AMember: TCodeConstMember; AMemberNode: TTreeNode);
@@ -115,7 +122,7 @@ var
   i, j: Integer;
   item: TCodeElement;
   classElement: TCodeClass;
-  classNode, scopeNode, funcNode, specializeNode: TTreeNode;
+  classNode, scopeNode, funcNode, specializeNode, enumNode, setNode: TTreeNode;
   element: TCodeElement;
 begin
 	for i := 0 to Pred(ACodeTree.Root.Children.Count) do
@@ -165,6 +172,16 @@ begin
     begin
       funcNode := FTreeView.Items.AddChild(ATypeNode, '');
     	BindFunction(item as TCodeFunction, funcNode);
+    end
+    else if item is TCodeEnum then
+    begin
+      enumNode := FTreeView.Items.AddChild(ATypeNode, '');
+      BindEnum(item as TCodeEnum, enumNode);
+    end
+    else if item is TCodeSet then
+    begin
+      setNode := FTreeView.Items.AddChild(ATypeNode, '');
+      BindSet(item as TCodeSet, setNode);
     end;
   end;
 end;
@@ -193,6 +210,39 @@ begin
       BindConstMember(mem, memNode);
     end;
   end;
+end;
+
+procedure TCodeBinder.BindSet(ASet: TCodeSet; ASetNode: TTreeNode);
+begin
+  ASetNode.Text := ASet.Name + ' set of ' + ASet.Enum;
+  ASetNode.Data := ASet;
+  ASetNode.StateIndex := FSetImageIndex;
+end;
+
+procedure TCodeBinder.BindEnum(AEnum: TCodeEnum; AEnumNode: TTreeNode);
+var
+  i: Integer;
+  attr: TCodeEnumAttr;
+  attrNode: TTreeNode;
+begin
+  AEnumNode.Text := AEnum.Name;
+  AEnumNode.Data := AEnum;
+  AEnumNode.StateIndex := FEnumImageIndex;
+
+  for i := 0 to Pred(AEnum.Children.Count) do
+  begin
+		attr := AEnum.Children[i] as TCodeEnumAttr;
+
+    attrNode := FTreeView.Items.AddChild(AEnumNode, '');
+    BindEnumAttr(attr, attrNode);
+  end;
+end;
+
+procedure TCodeBinder.BindEnumAttr(AEnumAttr: TCodeEnumAttr; AEnumAttrNode: TTreeNode);
+begin
+	AEnumAttrNode.Text := AEnumAttr.Name;
+  AEnumAttrNode.Data := AEnumAttr;
+  AEnumAttrNode.StateIndex := FEnumImageIndex;
 end;
 
 procedure TCodeBinder.BindClassScope(AClassScope: TCodeClassScope; AScopeNode: TTreeNode);
@@ -366,6 +416,8 @@ begin
   FFunctionArgvImageIndex := DefaultFunctionArgvImageIndex;
   FSpecializeImageIndex := DefaultSpecializeImageIndex;
   FConstImageIndex := DefaultConstImageIndex;
+  FEnumImageIndex := DefaultEnumImageIndex;
+  FSetImageIndex := DefaultSetImageIndex;
 end;
 
 procedure TCodeBinder.Bind(ACodeTree: TCodeTree; ATreeView: TTreeView);
@@ -422,6 +474,14 @@ begin
   else if AElement is TCodeClass then
   begin
     ANode.Text := GetCaption(AElement);
+  end
+  else if AElement is TCodeEnumAttr then
+  begin
+    BindEnumAttr(AElement as TCodeEnumAttr, ANode);
+  end
+  else if AElement is TCodeSet then
+  begin
+    BindSet(AElement as TCodeSet, ANode);
   end
   ;
 end;
