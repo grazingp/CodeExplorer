@@ -310,7 +310,7 @@ procedure TCodeWriter.WriteFunctionArgument(AFuncArgv: TCodeFunctionArgv;
 var
   i: Integer;
   item: TCodeElement;
-  mem: TCodeMember;
+  mem: TCodeFunctionParameter;
 begin
   ACode := '';
 	for i := 0 to Pred(AFuncArgv.Children.Count) do
@@ -318,10 +318,14 @@ begin
   	item := AFuncArgv.Children[i];
     if item is TCodeMember then
     begin
-    	mem := item as TCodeMember;
+    	mem := item as TCodeFunctionParameter;
       if not EggStrEmpty(ACode) then
       begin
         ACode += '; ';
+      end;
+      if not EggStrEmpty(mem.ParameterType) then
+      begin
+      	ACode += mem.ParameterType + ' ';
       end;
       ACode += mem.Name + ': ' + mem.MemberType;
     end;

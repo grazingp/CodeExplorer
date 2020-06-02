@@ -49,9 +49,6 @@ type
   	property Name: String read GetName write SetName;
   end;
 
-  TCodeConst = class(TCodeElement)
-  end;
-
   { TCodeComment }
   TCodeComment = class(TCodeElement)
   private
@@ -158,13 +155,40 @@ type
     property Comment: String read FComment write SetComment;
   end;
 
+  TCodeConst = class(TCodeElement)
+
+  end;
+
+  { TCodeConstMember }
+  TCodeConstMember = class(TCodeMember)
+  private
+    FDefaultValue: String;
+    procedure SetDefaultValue(AValue: String);
+  public
+  	constructor Create(AParentList: TCodeElementList);
+    property DefaultValue: String read FDefaultValue write SetDefaultValue;
+  end;
+
+  { TCodeFunctionParameter }
+  TCodeFunctionParameter = class(TCodeMember)
+  private
+    FDefaultValue: String;
+    FParameterType: String;
+    procedure SetDefaultValue(AValue: String);
+    procedure SetParameterType(AValue: String);
+  public
+  	constructor Create(AParentList: TCodeElementList);
+  	property ParameterType: String read FParameterType write SetParameterType;
+    property DefaultValue: String read FDefaultValue write SetDefaultValue;
+  end;
+
   { TCodeFunctionArgv }
   TCodeFunctionArgv = class(TCodeElement)
   private
     function GetFunctionElement: TCodeFunction;
   public
     function Equals(ASource: TObject): boolean; override;
-    function AppendMember(): TCodeMember;
+    function AppendParameter(): TCodeFunctionParameter;
     property FunctionElement: TCodeFunction read GetFunctionElement;
   end;
 
@@ -223,6 +247,42 @@ type
 
 
 implementation
+
+{ TCodeConstMember }
+
+procedure TCodeConstMember.SetDefaultValue(AValue: String);
+begin
+  if FDefaultValue = AValue then Exit;
+  FDefaultValue := AValue;
+end;
+
+constructor TCodeConstMember.Create(AParentList: TCodeElementList);
+begin
+  inherited Create(AParentList);
+  FDefaultValue := '';
+end;
+
+{ TCodeFunctionParameter }
+
+procedure TCodeFunctionParameter.SetParameterType(AValue: String);
+begin
+  if FParameterType = AValue then Exit;
+  FParameterType := AValue;
+end;
+
+procedure TCodeFunctionParameter.SetDefaultValue(AValue: String);
+begin
+  if FDefaultValue = AValue then Exit;
+  FDefaultValue := AValue;
+end;
+
+constructor TCodeFunctionParameter.Create(AParentList: TCodeElementList);
+begin
+  inherited Create(AParentList);
+
+  FParameterType := '';
+  FDefaultValue := '';
+end;
 
 { TCodeSpecialize }
 
@@ -316,9 +376,9 @@ begin
   Result := inherited Equals(ASource);
 end;
 
-function TCodeFunctionArgv.AppendMember(): TCodeMember;
+function TCodeFunctionArgv.AppendParameter(): TCodeFunctionParameter;
 begin
-  Result := Children.Append(TCodeMember) as TCodeMember;
+  Result := Children.Append(TCodeFunctionParameter) as TCodeFunctionParameter;
 end;
 
 { TCodeFunction }

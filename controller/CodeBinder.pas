@@ -22,6 +22,7 @@ const
   DefaultUnitImageIndex = 9;
   DefaultFunctionArgvImageIndex = 10;
   DefaultSpecializeImageIndex = 11;
+  DefaultConstImageIndex = 12;
 
 type
 
@@ -31,6 +32,7 @@ type
   private
     FTreeView: TTreeView;
     FFolderImageIndex: Integer;
+    FConstImageIndex: Integer;
     FClassImageIndex: Integer;
     FClassPrivateImageIndex: Integer;
     FClassProtectedImageIndex: Integer;
@@ -46,8 +48,11 @@ type
     procedure BindUnit(ACodeTree: TCodeTree; AUnitNode: TTreeNode);
     procedure BindUses(ACodeTree: TCodeTree; AUsesNode: TTreeNode);
     procedure BindType(ACodeTree: TCodeTree; ATypeNode: TTreeNode);
+    procedure BindConst(ACodeTree: TCodeTree; ATreeView: TTreeView);
     procedure BindClassScope(AClassScope: TCodeClassScope; AScopeNode: TTreeNode);
     procedure BindMember(AMember: TCodeMember; AMemberNode: TTreeNode);
+    procedure BindConstMember(AMember: TCodeConstMember; AMemberNode: TTreeNode);
+    procedure BindParameter(AParameter: TCodeFunctionParameter; AParameterNode: TTreeNode);
     procedure BindClassProperty(AClassProperty: TCodeClassProperty; APropNode: TTreeNode);
     procedure BindFunction(AFunction: TCodeFunction; AFuncNode: TTreeNode);
   	procedure BindSpecialize(ASpecialize: TCodeSpecialize; ASpecializeNode: TTreeNode);
@@ -164,6 +169,32 @@ begin
   end;
 end;
 
+procedure TCodeBinder.BindConst(ACodeTree: TCodeTree; ATreeView: TTreeView);
+var
+  i, j: Integer;
+  item: TCodeElement;
+  constNode, memNode: TTreeNode;
+  con: TCodeConst;
+  mem: TCodeConstMember;
+begin
+	for i := 0 to Pred(ACodeTree.Root.Children.Count) do
+ 	begin
+		item := ACodeTree.Root.Children[i];
+    if not (item is TCodeConst) then continue;
+
+    con := item as TCodeConst;
+    constNode := ATreeView.Items.AddObject(nil, 'Const', con);
+    constNode.StateIndex := FFolderImageIndex;
+
+    for j := 0 to Pred(con.Children.Count) do
+    begin
+    	mem := con.Children[j] as TCodeConstMember;
+			memNode := ATreeView.Items.AddChild(constNode, '');
+      BindConstMember(mem, memNode);
+    end;
+  end;
+end;
+
 procedure TCodeBinder.BindClassScope(AClassScope: TCodeClassScope; AScopeNode: TTreeNode);
 var
   i: Integer;
@@ -199,6 +230,35 @@ begin
   AMemberNode.StateIndex := FMemberImageIndex;
 end;
 
+procedure TCodeBinder.BindConstMember(AMember: TCodeConstMember; AMemberNode: TTreeNode);
+var
+  txt: String;
+begin
+  txt := AMember.Name + ' : ' + AMember.MemberType;
+  if not EggStrEmpty(AMember.DefaultValue) then
+  begin
+		txt += ' = ' + AMember.DefaultValue;
+  end;
+	AMemberNode.Text := txt;
+  AMemberNode.Data := AMember;
+  AMemberNode.StateIndex := FConstImageIndex;
+end;
+
+procedure TCodeBinder.BindParameter(AParameter: TCodeFunctionParameter; AParameterNode: TTreeNode);
+var
+  txt: String;
+begin
+  txt := '';
+  if not EggStrEmpty(AParameter.ParameterType) then
+  begin
+    txt += AParameter.ParameterType + ' ';
+  end;
+  txt += AParameter.Name + ' : ' + AParameter.MemberType;
+	AParameterNode.Text := txt;
+  AParameterNode.Data := AParameter;
+  AParameterNode.StateIndex := FMemberImageIndex;
+end;
+
 procedure TCodeBinder.BindClassProperty(AClassProperty: TCodeClassProperty; APropNode: TTreeNode);
 begin
   APropNode.Text := AClassProperty.Name + ' : ' + AClassProperty.PropertyType;
@@ -211,7 +271,7 @@ var
   i, j: Integer;
   element: TCodeElement;
   arg: TCodeFunctionArgv;
-  mem: TCodeMember;
+  mem: TCodeFunctionParameter;
   nm, args: String;
   argvNode, memNode: TTreeNode;
   oldExpanded: Boolean;
@@ -238,9 +298,13 @@ begin
         end
         else
         begin
-        	args += ', ';
+        	args += '; ';
         end;
-        mem := arg.Children[j] as TCodeMember;
+        mem := arg.Children[j] as TCodeFunctionParameter;
+        if not EggStrEmpty(mem.ParameterType) then
+        begin
+        	args += mem.ParameterType + ' ';
+        end;
         args += mem.Name + ' : ' + mem.MemberType;
 
       	memNode := FTreeView.Items.AddChild(argvNode, '');
@@ -301,6 +365,7 @@ begin
   FUnitImageIndex := DefaultUnitImageIndex;
   FFunctionArgvImageIndex := DefaultFunctionArgvImageIndex;
   FSpecializeImageIndex := DefaultSpecializeImageIndex;
+  FConstImageIndex := DefaultConstImageIndex;
 end;
 
 procedure TCodeBinder.Bind(ACodeTree: TCodeTree; ATreeView: TTreeView);
@@ -318,6 +383,8 @@ begin
   usesNode.StateIndex := FFolderImageIndex;
   BindUses(ACodeTree, usesNode);
 
+  BindConst(ACodeTree, ATreeView);
+
   typeNode := ATreeView.Items.Add(nil, 'Type');
   typeNode.StateIndex := FFolderImageIndex;
 
@@ -331,6 +398,14 @@ begin
   if AElement is TCodeFunction then
   begin
   	BindFunction(AElement as TCodeFunction, ANode);
+  end
+  else if AElement is TCodeFunctionParameter then
+  begin
+    BindParameter(AElement as TCodeFunctionParameter, ANode);
+  end
+  else if AElement is TCodeConstMember then
+  begin
+    BindConstMember(AElement as TCodeConstMember, ANode);
   end
   else if AElement is TCodeMember then
   begin

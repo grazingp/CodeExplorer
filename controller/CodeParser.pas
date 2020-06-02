@@ -35,10 +35,11 @@ type
     procedure ParseFunctionImpl();
 		function NextToken(const AKeyword: String; ANextIndex: Integer): Integer;
 		function GetNextToken(const AKeyword: String; AIndex: Integer): Integer;
-    function GetNextWord(AIndex: Integer): String;
+    function GetNextWord(AIndex: Integer; var AWord: String): Integer;
     function NextWord(var AWord: String; ANextIndex: Integer): Integer;
-    function GetPriorWord(AIndex: Integer): String;
-    function GetNextNotSpace(AIndex: Integer): String;
+    function GetPriorWord(AIndex: Integer; var AWord: String): Integer;
+    function GetNextNotSpace(AIndex: Integer; var AToken: String): Integer;
+    function GetNextValue(AIndex: Integer; var AValue: String): Integer;
     function FindFunctionName(AParent: TCodeElement; AFuncName: String; AArgv: TCodeFunctionArgv): TCodeFunction;
     function FindClassFunctionName(const AClassName, AFuncName: String; AArgv: TCodeFunctionArgv): TCodeFunction;
     procedure InsertionComment(AElement: TCodeElement);
@@ -129,7 +130,7 @@ begin
     end
     else if EggStrEqualSame(c, 'class') then
     begin
-      next := GetNextNotSpace(FIndex + 1);
+      GetNextNotSpace(FIndex + 1, next);
       if EggStrEqualSame(next, ';') then
       begin
         NextToken(';', 1);
@@ -167,8 +168,42 @@ begin
 end;
 
 procedure TCodeParser.ParseConst(AConst: TCodeConst);
+var
+  nm, typ, eq, colon, val: String;
+  p: Integer;
+  mem: TCodeConstMember;
 begin
+	while FIndex < Length(FTokens) do
+ 	begin
+		p := GetNextNotSpace(FIndex, nm);
+    if EggStrEqualSame(nm, 'type') then
+    begin
+			break;
+  	end;
+		p := GetNextNotSpace(p + 1, typ);
+    if EggStrEqual(typ, '=') then
+    begin
+      typ := '';
+    end
+    else
+    begin
+  		p := GetNextNotSpace(p + 1, typ);
+      p := GetNextNotSpace(p + 1, eq);
+			if not EggStrEqual(eq, '=') then
+      begin
+        break;
+      end;
+    end;
+    p := GetNextValue(p + 1, val);
+    FIndex := GetNextNotSpace(p + 1, colon);
 
+    mem := AConst.Children.Append(TCodeConstMember) as TCodeConstMember;
+    mem.Name := nm;
+    mem.MemberType := typ;
+    mem.DefaultValue := val;
+
+    Inc(FIndex);
+  end;
 end;
 
 procedure TCodeParser.ParseUses(ACodeUses: TCodeUses);
@@ -222,9 +257,10 @@ end;
 
 procedure TCodeParser.ParseSpecialize(ASpecialize: TCodeSpecialize);
 var
-  b, t: String;
+  b, t, nm: String;
 begin
-	ASpecialize.Name := GetPriorWord(FIndex - 1);
+  GetPriorWord(FIndex - 1, nm);
+	ASpecialize.Name := nm;
   Inc(FIndex);
   NextWord(b, 1);
   ASpecialize.BaseClass := b;
@@ -249,8 +285,10 @@ var
   prop: TCodeClassProperty;
   func: TCodeClassFunction;
 begin
-	AElement.Code := GetPriorWord(FIndex - 1);
-	AElement.BaseClass := GetNextWord(FIndex + 1);
+  GetPriorWord(FIndex - 1, c);
+	AElement.Code := c;
+  GetNextWord(FIndex + 1, nm);
+  AElement.BaseClass := nm;
   scope := nil;
   Inc(FIndex);
   while FIndex < Length(FTokens) do
@@ -319,8 +357,8 @@ begin
     begin
       // Class Member
       DefaultScope(scope);
-			typ := GetNextWord(FIndex + 1);
-			nm := GetPriorWord(FIndex - 1);
+			GetNextWord(FIndex + 1, typ);
+			GetPriorWord(FIndex - 1, nm);
       member := scope.Children.Append(TCodeClassMember) as TCodeClassMember;
       member.Name := nm;
       member.MemberType := typ;
@@ -338,21 +376,23 @@ var
   idx: Integer;
 begin
   NextToken(':', 0);
-	typ := GetNextWord(FIndex + 1);
-	nm := GetPriorWord(FIndex - 1);
+	GetNextWord(FIndex + 1, typ);
+	GetPriorWord(FIndex - 1, nm);
   AProp.Name := nm;
   AProp.PropertyType := typ;
 
   idx := GetNextToken('read', FIndex + 1);
   if idx >= 0 then
   begin
-		AProp.Getter := GetNextWord(idx + 1);
+    GetNextWord(idx + 1, nm);
+		AProp.Getter := nm
   end;
 
   idx := GetNextToken('write', FIndex + 1);
   if idx >= 0 then
   begin
-		AProp.Setter := GetNextWord(idx + 1);
+    GetNextWord(idx + 1, nm);
+		AProp.Setter := nm;
   end;
 
   NextToken(';', 1);
@@ -391,14 +431,15 @@ begin
   p := GetNextToken(':', FIndex);
   if p >= 0 then
   begin
-    AResultType := GetNextWord(p);
+    GetNextWord(p, AResultType);
   end;
 end;
 
 procedure TCodeParser.ParseFunctionArgv(AFuncArgv: TCodeFunctionArgv);
 var
-  c, typ, nm: String;
-  mem: TCodeMember;
+  c, typ, nm, paramType, eq, def: String;
+  param: TCodeFunctionParameter;
+  p: Integer;
 begin
   while FIndex < Length(FTokens) do
   begin
@@ -410,11 +451,25 @@ begin
     end
     else if EggStrEqual(c, ':') then
     begin
-			nm := GetPriorWord(FIndex);
-      typ := GetNextWord(FIndex);
-      mem := AFuncArgv.Children.AppendMember();
-      mem.Name := nm;
-      mem.MemberType := typ;
+			p := GetPriorWord(FIndex, nm);
+      GetPriorWord(p - 1, paramType);
+      FIndex := GetNextWord(FIndex, typ);
+      def := '';
+      p := GetNextNotSpace(FIndex + 1, eq);
+      if (p >= 0) and EggStrEqual(eq, '=') then
+      begin
+				GetNextWord(p + 1, def);
+      end;
+      param := AFuncArgv.AppendParameter();
+      param.Name := nm;
+      param.MemberType := typ;
+      if EggStrEqualSame(paramType, 'var')
+      	or EggStrEqualSame(paramType, 'out')
+        or EggStrEqualSame(paramType, 'const')
+      then begin
+				param.ParameterType := paramType;
+      end;
+      param.DefaultValue := def;
     end;
     Inc(FIndex);
   end;
@@ -430,7 +485,7 @@ begin
 	// Class.FunctionName
   // FunctionName()
   NextWord(cname, 1);
-  dot := GetNextNotSpace(FIndex);
+  GetNextNotSpace(FIndex, dot);
   if EggStrEqual(dot, '.') then
   begin
     Inc(FIndex);
@@ -546,12 +601,13 @@ begin
   end;
 end;
 
-function TCodeParser.GetNextWord(AIndex: Integer): String;
+function TCodeParser.GetNextWord(AIndex: Integer; var AWord: String): Integer;
 var
   i: Integer;
   c: String;
 begin
-  Result := '';
+  AWord := '';
+  Result := -1;
   for i := AIndex to Pred(Length(FTokens)) do
   begin
 		c := FTokens[i];
@@ -560,7 +616,8 @@ begin
     end
     else
     begin
-      Result := c;
+      AWord := c;
+      Result := i;
       exit;
     end;
   end;
@@ -590,11 +647,13 @@ begin
   end;
 end;
 
-function TCodeParser.GetPriorWord(AIndex: Integer): String;
+function TCodeParser.GetPriorWord(AIndex: Integer; var AWord: String): Integer;
 var
   i: Integer;
   c: String;
 begin
+  AWord := '';
+  Result := -1;
 	for i := AIndex downto 0 do
   begin
 		c := FTokens[i];
@@ -603,18 +662,21 @@ begin
     end
     else
     begin
-      Result := c;
+      AWord := c;
+      Result := i;
       exit;
     end;
   end;
 end;
 
-function TCodeParser.GetNextNotSpace(AIndex: Integer): String;
+function TCodeParser.GetNextNotSpace(AIndex: Integer;
+  var AToken: String): Integer;
 var
   i: Integer;
   c: String;
 begin
-  Result := '';
+  AToken := '';
+  Result := -1;
   for i := AIndex to Pred(Length(FTokens)) do
   begin
 		c := FTokens[i];
@@ -623,7 +685,39 @@ begin
     end
     else
     begin
-      Result := c;
+      AToken := c;
+      Result := i;
+      exit;
+    end;
+  end;
+end;
+
+function TCodeParser.GetNextValue(AIndex: Integer; var AValue: String): Integer;
+var
+  i: Integer;
+  c: String;
+begin
+	AValue := '';
+  Result := -1;
+  for i := AIndex to Pred(Length(FTokens)) do
+  begin
+		c := FTokens[i];
+    if EggArrayIndex(FSpaces, c) >= 0 then
+    begin
+    end
+    else if EggStrEqual(c, '''') then
+    begin
+      if (i + 2) < Length(FTokens) then
+      begin
+        AValue := FTokens[i + 1];
+        Result := i + 2;
+        exit;
+      end;
+    end
+    else
+    begin
+      AValue := c;
+      Result := i;
       exit;
     end;
   end;

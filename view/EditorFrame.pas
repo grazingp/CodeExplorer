@@ -16,7 +16,7 @@ type
 
   TFEditorFrame = class(TFrame)
     FAddArgument_mitem: TMenuItem;
-    FAddArgvMember: TMenuItem;
+    FAddArgvParameter_mitem: TMenuItem;
     FAddFunction_mitem: TMenuItem;
     FAddMember_mitem: TMenuItem;
     FAddPrivate_mitem: TMenuItem;
@@ -35,6 +35,7 @@ type
     FCodeParse_btn: TToolButton;
     FCodeWrite_btn: TToolButton;
     FCode_ed: TSynEdit;
+    FWriteCode_ed: TSynEdit;
     FCode_tree: TTreeView;
     FDeleteMember_mitem: TMenuItem;
     FDeleteProperty_mitem: TMenuItem;
@@ -49,8 +50,17 @@ type
     FFunction_page: TPage;
     FFunction_pop: TPopupMenu;
     FMemberComment_ed: TMemo;
+    FParameterComment_ed: TMemo;
     FMemberName_ed: TEdit;
+    FConstMemberComment_ed: TMemo;
+    FParameterDefaultValue_ed: TEdit;
+    FConstMemberDefaultValue_ed: TEdit;
+    FConstMemberType_cmb: TComboBox;
+    FConstMemberName_ed: TEdit;
+    FParameterType_cmb: TComboBox;
+    FParameterName_ed: TEdit;
     FMemberType_cmb: TComboBox;
+    FParameterMemberType_cmb: TComboBox;
     FMember_page: TPage;
     FMember_pop: TPopupMenu;
     FPasteEditor_btn: TToolButton;
@@ -68,6 +78,7 @@ type
     FSpecialize_pop: TPopupMenu;
     FTreeBar_imgs: TImageList;
     FTree_imgs: TImageList;
+    FWrite_imgs: TImageList;
     Label1: TLabel;
     Label10: TLabel;
     Label11: TLabel;
@@ -77,7 +88,16 @@ type
     Label15: TLabel;
     Label16: TLabel;
     Label17: TLabel;
+    Label18: TLabel;
+    Label19: TLabel;
     Label2: TLabel;
+    Label20: TLabel;
+    Label21: TLabel;
+    Label22: TLabel;
+    Label23: TLabel;
+    Label24: TLabel;
+    Label25: TLabel;
+    Label27: TLabel;
     Label3: TLabel;
     Label4: TLabel;
     Label5: TLabel;
@@ -86,10 +106,19 @@ type
     Label8: TLabel;
     Label9: TLabel;
     MenuItem1: TMenuItem;
-    Panel1: TPanel;
+    FParameter_page: TPage;
+    FDeleteParameter_mitem: TMenuItem;
+    FConstMember_page: TPage;
+    FDeleteConstMember_mitem: TMenuItem;
+    FSource_pnl: TPanel;
     Panel10: TPanel;
     Panel11: TPanel;
     Panel12: TPanel;
+    Panel13: TPanel;
+    Panel14: TPanel;
+    FCode_pnl: TPanel;
+    FWrite_pnl: TPanel;
+    Panel17: TPanel;
     Panel2: TPanel;
     Panel3: TPanel;
     Panel4: TPanel;
@@ -98,13 +127,21 @@ type
     Panel7: TPanel;
     Panel8: TPanel;
     Panel9: TPanel;
+    FParameter_pop: TPopupMenu;
+    FConstMember_pop: TPopupMenu;
     Splitter1: TSplitter;
     Splitter2: TSplitter;
     SynFreePascalSyn1: TSynFreePascalSyn;
     ToolBar1: TToolBar;
     ToolBar2: TToolBar;
+    ToolBar3: TToolBar;
+    FAccept_btn: TToolButton;
+    ToolButton1: TToolButton;
+    FCancel_btn: TToolButton;
+    FSaveCode_btn: TToolButton;
+    procedure FAccept_btnClick(Sender: TObject);
     procedure FAddArgument_mitemClick(Sender: TObject);
-    procedure FAddArgvMemberClick(Sender: TObject);
+    procedure FAddArgvParameter_mitemClick(Sender: TObject);
     procedure FAddFunction_mitemClick(Sender: TObject);
     procedure FAddMember_mitemClick(Sender: TObject);
     procedure FAddPrivate_mitemClick(Sender: TObject);
@@ -112,28 +149,40 @@ type
     procedure FAddProtected_mitemClick(Sender: TObject);
     procedure FAddPublic_mitemClick(Sender: TObject);
     procedure FAddPublished_mitemClick(Sender: TObject);
+    procedure FCancel_btnClick(Sender: TObject);
     procedure FCodeParse_btnClick(Sender: TObject);
     procedure FCodeWrite_btnClick(Sender: TObject);
     procedure FCode_treeDragDrop(Sender, Source: TObject; X, Y: Integer);
-
-      procedure FCode_treeDragOver(Sender, Source: TObject; X, Y: Integer; State: TDragState;
-      var Accept: Boolean);
-      procedure FCode_treeEnter(Sender: TObject);
-      procedure FCode_treeKeyUp(Sender: TObject;
-        var Key: Word; Shift: TShiftState);
+    procedure FCode_treeDragOver(Sender, Source: TObject; X, Y: Integer; State: TDragState;
+    var Accept: Boolean);
+    procedure FCode_treeEnter(Sender: TObject);
+    procedure FCode_treeKeyUp(Sender: TObject;
+      var Key: Word; Shift: TShiftState);
     procedure FCode_treeMouseEnter(Sender: TObject);
     procedure FCode_treeSelectionChanged(Sender: TObject);
+    procedure FDeleteConstMember_mitemClick(Sender: TObject);
     procedure FDeleteMember_mitemClick(Sender: TObject);
+    procedure FDeleteParameter_mitemClick(Sender: TObject);
     procedure FDeleteProperty_mitemClick(Sender: TObject);
     procedure FDeleteSpecialize_mitemClick(Sender: TObject);
     procedure FFunctionDelete_mitemClick(Sender: TObject);
     procedure FPasteEditor_btnClick(Sender: TObject);
+    procedure FSaveCode_btnClick(Sender: TObject);
   private
     FFileName: String;
     FCodeTree: TCodeTree;
 
     procedure DoChangeClassBaseClass(Sender: TObject);
     procedure DoChangeClassName(Sender: TObject);
+    procedure DoChangeConstMemberComment(Sender: TObject);
+    procedure DoChangeConstMemberDefaultValue(Sender: TObject);
+    procedure DoChangeConstMemberName(Sender: TObject);
+    procedure DoChangeConstMemberType(Sender: TObject);
+    procedure DoChangeParameterComment(Sender: TObject);
+    procedure DoChangeParameterDefaultValue(Sender: TObject);
+    procedure DoChangeParameterMemberType(Sender: TObject);
+    procedure DoChangeParameterName(Sender: TObject);
+    procedure DoChangeParameterType(Sender: TObject);
     procedure DoChangeSpecializeBaseClass(Sender: TObject);
     procedure DoChangeSpecializeName(Sender: TObject);
     procedure DoChangeSpecializeTypeClass(Sender: TObject);
@@ -141,7 +190,7 @@ type
     procedure BindElement(AElement: TCodeElement);
     procedure DeleteElement(AElementClass: TClass);
     procedure AppendArgument();
-    procedure AppendArgvMember(AArgv: TCodeFunctionArgv);
+    procedure AppendArgvParameter(AArgv: TCodeFunctionArgv);
     procedure DoChangeClassComment(Sender: TObject);
     procedure DoChangeClassPropertyComment(Sender: TObject);
     procedure DoChangeClassPropertyGetter(Sender: TObject);
@@ -178,12 +227,27 @@ const
   EDITOR_CLASS_PROPERTY_PAGE = 2;
   EDITOR_MEMBER_PAGE = 3;
   EDITOR_SPECIALIZE_PAGE = 4;
+  EDITOR_PARAMETER_PAGE = 5;
+  EDITOR_CONST_MEMBER_PAGE = 6;
+
+  CODE_WIDTH = 384;
 
 { TFMainForm }
 procedure TFEditorFrame.FPasteEditor_btnClick(Sender: TObject);
 begin
   //
   FCode_ed.Text := Clipboard.AsText;
+end;
+
+procedure TFEditorFrame.FSaveCode_btnClick(Sender: TObject);
+var
+  src: String;
+begin
+  src := FCode_ed.Text;
+  if not EggStrEmpty(FFileName) then
+  begin
+		EggStrToFile(FFileName, src);
+  end;
 end;
 
 procedure TFEditorFrame.RebindElemnt();
@@ -275,6 +339,177 @@ begin
   end;
 end;
 
+procedure TFEditorFrame.DoChangeConstMemberComment(Sender: TObject);
+var
+  node: TTreeNode;
+  element: TCodeElement;
+  mem: TCodeConstMember;
+begin
+  node := FCode_tree.Selected;
+  if Assigned(node) then
+  begin
+    if not Assigned(node.Data) then exit;
+    element := TCodeElement(node.Data);
+    if element is TCodeConstMember then
+    begin
+      mem := element as TCodeConstMember;
+      mem.Comment := FConstMemberComment_ed.Text;
+    end;
+  end;
+end;
+
+procedure TFEditorFrame.DoChangeConstMemberDefaultValue(Sender: TObject);
+var
+  node: TTreeNode;
+  element: TCodeElement;
+  mem: TCodeConstMember;
+begin
+  node := FCode_tree.Selected;
+  if Assigned(node) then
+  begin
+    if not Assigned(node.Data) then exit;
+    element := TCodeElement(node.Data);
+    if element is TCodeConstMember then
+    begin
+      mem := element as TCodeConstMember;
+      mem.DefaultValue := FConstMemberDefaultValue_ed.Text;
+    end;
+  end;
+end;
+
+procedure TFEditorFrame.DoChangeConstMemberName(Sender: TObject);
+var
+  node: TTreeNode;
+  element: TCodeElement;
+  mem: TCodeConstMember;
+begin
+  node := FCode_tree.Selected;
+  if Assigned(node) then
+  begin
+    if not Assigned(node.Data) then exit;
+    element := TCodeElement(node.Data);
+    if element is TCodeConstMember then
+    begin
+      mem := element as TCodeConstMember;
+      mem.Name := FConstMemberName_ed.Text;
+    end;
+  end;
+end;
+
+procedure TFEditorFrame.DoChangeConstMemberType(Sender: TObject);
+var
+  node: TTreeNode;
+  element: TCodeElement;
+  mem: TCodeConstMember;
+begin
+  node := FCode_tree.Selected;
+  if Assigned(node) then
+  begin
+    if not Assigned(node.Data) then exit;
+    element := TCodeElement(node.Data);
+    if element is TCodeConstMember then
+    begin
+      mem := element as TCodeConstMember;
+      mem.MemberType := FConstMemberType_cmb.Text;
+    end;
+  end;
+end;
+
+procedure TFEditorFrame.DoChangeParameterComment(Sender: TObject);
+var
+  node: TTreeNode;
+  element: TCodeElement;
+  param: TCodeFunctionParameter;
+begin
+  node := FCode_tree.Selected;
+  if Assigned(node) then
+  begin
+    if not Assigned(node.Data) then exit;
+    element := TCodeElement(node.Data);
+    if element is TCodeFunctionParameter then
+    begin
+      param := element as TCodeFunctionParameter;
+      param.Comment := FParameterComment_ed.Text;
+    end;
+  end;
+end;
+
+procedure TFEditorFrame.DoChangeParameterDefaultValue(Sender: TObject);
+var
+  node: TTreeNode;
+  element: TCodeElement;
+  param: TCodeFunctionParameter;
+begin
+  node := FCode_tree.Selected;
+  if Assigned(node) then
+  begin
+    if not Assigned(node.Data) then exit;
+    element := TCodeElement(node.Data);
+    if element is TCodeFunctionParameter then
+    begin
+      param := element as TCodeFunctionParameter;
+      param.DefaultValue := FParameterDefaultValue_ed.Text;
+    end;
+  end;
+end;
+
+procedure TFEditorFrame.DoChangeParameterMemberType(Sender: TObject);
+var
+  node: TTreeNode;
+  element: TCodeElement;
+  param: TCodeFunctionParameter;
+begin
+  node := FCode_tree.Selected;
+  if Assigned(node) then
+  begin
+    if not Assigned(node.Data) then exit;
+    element := TCodeElement(node.Data);
+    if element is TCodeFunctionParameter then
+    begin
+      param := element as TCodeFunctionParameter;
+      param.MemberType := FParameterMemberType_cmb.Text;
+    end;
+  end;
+end;
+
+procedure TFEditorFrame.DoChangeParameterName(Sender: TObject);
+var
+  node: TTreeNode;
+  element: TCodeElement;
+  param: TCodeFunctionParameter;
+begin
+  node := FCode_tree.Selected;
+  if Assigned(node) then
+  begin
+    if not Assigned(node.Data) then exit;
+    element := TCodeElement(node.Data);
+    if element is TCodeFunctionParameter then
+    begin
+      param := element as TCodeFunctionParameter;
+      param.Name := FParameterName_ed.Text;
+    end;
+  end;
+end;
+
+procedure TFEditorFrame.DoChangeParameterType(Sender: TObject);
+var
+  node: TTreeNode;
+  element: TCodeElement;
+  param: TCodeFunctionParameter;
+begin
+  node := FCode_tree.Selected;
+  if Assigned(node) then
+  begin
+    if not Assigned(node.Data) then exit;
+    element := TCodeElement(node.Data);
+    if element is TCodeFunctionParameter then
+    begin
+      param := element as TCodeFunctionParameter;
+      param.ParameterType := FParameterType_cmb.Text;
+    end;
+  end;
+end;
+
 procedure TFEditorFrame.DoChangeClassBaseClass(Sender: TObject);
 var
   node: TTreeNode;
@@ -354,21 +589,20 @@ begin
     begin
       func := element as TCodeFunction;
       arg := func.AppendArgument();
-      AppendArgvMember(arg);
+      AppendArgvParameter(arg);
     end;
   end;
 end;
 
-procedure TFEditorFrame.AppendArgvMember(AArgv: TCodeFunctionArgv);
+procedure TFEditorFrame.AppendArgvParameter(AArgv: TCodeFunctionArgv);
 var
-  mem: TCodeMember;
+  param: TCodeFunctionParameter;
   node: TTreeNode;
 begin
-  // TODO: AppendArgvMember
-  mem := AArgv.AppendMember();
-  mem.Name := 'Member';
+  param := AArgv.AppendParameter();
+  param.Name := 'Parameter';
   BindElement(AArgv.FunctionElement);
-  node := FCode_tree.Items.FindNodeWithData(mem);
+  node := FCode_tree.Items.FindNodeWithData(param);
   FCode_tree.Selected := node;
 end;
 
@@ -765,6 +999,10 @@ begin
   FFunctionContent_ed.Font.Assign(FCode_ed.Font);
 
   FFunctionContent_ed.Keystrokes.Assign(FCode_ed.Keystrokes);
+
+  FCode_pnl.Width := CODE_WIDTH;
+  FWrite_pnl.Visible := False;
+  FWrite_pnl.Width := CODE_WIDTH;
 end;
 
 destructor TFEditorFrame.Destroy;
@@ -802,7 +1040,14 @@ begin
   AppendArgument();
 end;
 
-procedure TFEditorFrame.FAddArgvMemberClick(Sender: TObject);
+procedure TFEditorFrame.FAccept_btnClick(Sender: TObject);
+begin
+  FWrite_pnl.Visible := False;
+  FCode_ed.Text := FWriteCode_ed.Text;
+  FCode_pnl.Width := CODE_WIDTH;
+end;
+
+procedure TFEditorFrame.FAddArgvParameter_mitemClick(Sender: TObject);
 var
   node: TTreeNode;
   element: TCodeElement;
@@ -816,7 +1061,7 @@ begin
     if element is TCodeFunctionArgv then
     begin
       arg := element as TCodeFunctionArgv;
-      AppendArgvMember(arg);
+      AppendArgvParameter(arg);
     end;
   end;
 end;
@@ -841,6 +1086,13 @@ begin
   AddScope('published').StateIndex := DefaultClassPublishedImageIndex;
 end;
 
+procedure TFEditorFrame.FCancel_btnClick(Sender: TObject);
+begin
+	FWriteCode_ed.Text := '';
+  FWrite_pnl.Visible := False;
+  FCode_pnl.Width := CODE_WIDTH;
+end;
+
 procedure TFEditorFrame.FCodeWrite_btnClick(Sender: TObject);
 var
   wri: TCodeWriter;
@@ -855,7 +1107,13 @@ begin
     begin
       src := StringReplace(src, #10, LineEnding, [rfReplaceAll]);
     end;
-    Clipboard.AsText := src;
+
+    //Clipboard.AsText := src;
+		FWriteCode_ed.Text := src;
+
+    FCode_pnl.Width := CODE_WIDTH * 2;
+    FWrite_pnl.Width := CODE_WIDTH;
+    FWrite_pnl.Visible := True;
   finally
     FreeAndNil(wri);
   end;
@@ -955,6 +1213,8 @@ var
   prop: TCodeClassProperty;
   mem: TCodeMember;
   sp: TCodeSpecialize;
+  param: TCodeFunctionParameter;
+  constMem: TCodeConstMember;
 begin
   pageIndex := -1;
   node := FCode_tree.Selected;
@@ -981,6 +1241,25 @@ begin
     else if element is TCodeClassScope then
     begin
       FCode_tree.PopupMenu := FClassScope_pop;
+    end
+    else if element is TCodeConstMember then
+    begin
+      constMem := element as TCodeConstMember;
+      FConstMemberName_ed.OnChange := nil;
+      FConstMemberName_ed.Text := constMem.Name;
+      FConstMemberName_ed.OnChange := @DoChangeConstMemberName;
+      FConstMemberType_cmb.OnChange := nil;
+      FConstMemberType_cmb.Text := constMem.MemberType;
+      FConstMemberType_cmb.OnChange := @DoChangeConstMemberType;
+      FConstMemberDefaultValue_ed.OnChange := nil;
+      FConstMemberDefaultValue_ed.Text := constMem.DefaultValue;
+      FConstMemberDefaultValue_ed.OnChange := @DoChangeConstMemberDefaultValue;
+      FConstMemberComment_ed.OnChange := nil;
+      FConstMemberComment_ed.Text := param.Comment;
+      FConstMemberComment_ed.OnChange := @DoChangeConstMemberComment;
+
+      FCode_tree.PopupMenu := FConstMember_pop;
+      pageIndex := EDITOR_CONST_MEMBER_PAGE;
     end
     else if element is TCodeFunction then
     begin
@@ -1027,6 +1306,28 @@ begin
       FCode_tree.PopupMenu := FProperty_pop;
       pageIndex := EDITOR_CLASS_PROPERTY_PAGE;
     end
+    else if element is TCodeFunctionParameter then
+    begin
+      param := element as TCodeFunctionParameter;
+      FParameterName_ed.OnChange := nil;
+      FParameterName_ed.Text := param.Name;
+      FParameterName_ed.OnChange := @DoChangeParameterName;
+      FParameterMemberType_cmb.OnChange := nil;
+      FParameterMemberType_cmb.Text := param.MemberType;
+      FParameterMemberType_cmb.OnChange := @DoChangeParameterMemberType;
+      FParameterType_cmb.OnChange := nil;
+      FParameterType_cmb.Text := param.ParameterType;
+      FParameterType_cmb.OnChange := @DoChangeParameterType;
+      FParameterDefaultValue_ed.OnChange := nil;
+      FParameterDefaultValue_ed.Text := param.DefaultValue;
+      FParameterDefaultValue_ed.OnChange := @DoChangeParameterDefaultValue;
+      FParameterComment_ed.OnChange := nil;
+      FParameterComment_ed.Text := param.Comment;
+      FParameterComment_ed.OnChange := @DoChangeParameterComment;
+
+      FCode_tree.PopupMenu := FParameter_pop;
+      pageIndex := EDITOR_PARAMETER_PAGE;
+    end
     else if element is TCodeMember then
     begin
       mem := element as TCodeMember;
@@ -1064,9 +1365,19 @@ begin
   FEditor_book.PageIndex := pageIndex;
 end;
 
+procedure TFEditorFrame.FDeleteConstMember_mitemClick(Sender: TObject);
+begin
+  DeleteElement(TCodeConstMember.ClassType);
+end;
+
 procedure TFEditorFrame.FDeleteMember_mitemClick(Sender: TObject);
 begin
   DeleteElement(TCodeMember.ClassType);
+end;
+
+procedure TFEditorFrame.FDeleteParameter_mitemClick(Sender: TObject);
+begin
+  DeleteElement(TCodeFunctionParameter.ClassType);
 end;
 
 procedure TFEditorFrame.FDeleteProperty_mitemClick(Sender: TObject);
